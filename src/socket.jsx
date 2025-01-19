@@ -4,7 +4,7 @@ import { server } from './constants/config';
 const SocketContext=createContext();
  const getSocket=()=>useContext(SocketContext)
 const SocketProvider=({children})=>{
-    console.log(server)
+    
     
     const socket=useMemo(()=>io(server,{withCredentials:true}))
 
