@@ -9,6 +9,7 @@ import "./index.css";
 import Room from "./pages/room";
 import { userExists, usernotExits } from "./redux/reducers/auth";
 import { SocketProvider } from "./socket";
+import { server } from './constants/config';
 
 
 const UserManagement = lazy(() => import("./pages/usermanagement"));
@@ -49,7 +50,7 @@ function App() {
     useEffect(()=>{
       
       axios
-        .get(`/api/v1/user/me`,{withCredentials:true})
+        .get(`${server}/api/v1/user/me`,{withCredentials:true})
        .then((res)=>dispatch(userExists(res.data.user)))
        .catch((err)=>dispatch(usernotExits()))
     },[dispatch])

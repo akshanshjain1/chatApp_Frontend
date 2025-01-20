@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { VisuallyHiddenInput } from "../components/styles/styledcomponents";
 import { userExists } from "../redux/reducers/auth";
 import { usernamevalidater } from "../utils/validators";
+import { server } from '../constants/config';
 function Login(){
     const [islogin,setislogin]=useState(true)
     const name=useInputValidation("")
@@ -30,7 +31,7 @@ function Login(){
         }
         try {
         setisloading(true)
-         const {data}=  await axios.post(`/api/v1/user/login`,{
+         const {data}=  await axios.post(`${server}/api/v1/user/login`,{
                 username:username.value,
                 password:password.value
             },config);
@@ -57,7 +58,7 @@ function Login(){
       
         try {
             setisloading(true)
-            const {data}=await axios.post(`/api/v1/user/newuser`,formdata,{
+            const {data}=await axios.post(`${server}/api/v1/user/newuser`,formdata,{
                 withCredentials:true,
                 "Content-Type":"multipart/form-data"
             });

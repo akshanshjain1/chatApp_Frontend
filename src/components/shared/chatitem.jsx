@@ -3,6 +3,7 @@ import { Link } from "../styles/styledcomponents";
 import { Box, Stack, Typography } from "@mui/material";
 import AvatarCard from "./avatarcard";
 import {motion} from "framer-motion"
+import { useParams } from "react-router-dom";
 function ChatItem({
   avatar = [],
   name,
@@ -14,6 +15,8 @@ function ChatItem({
   index = 0,
   handledeletechat,
 }) {
+  const { chatId } = useParams();
+
   return (
     <Link
     
@@ -36,7 +39,7 @@ function ChatItem({
         <AvatarCard avatar={avatar}/>
         <Stack>
           <Typography>{name}</Typography>
-          {newmessagealert && (
+          {newmessagealert && chatId!==_id &&   (
             <Typography>{newmessagealert.count} New Message</Typography>
           )}
         </Stack>

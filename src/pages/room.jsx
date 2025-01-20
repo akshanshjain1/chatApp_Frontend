@@ -120,7 +120,7 @@ function Room() {
   });
 
   const handleCallCut=useCallback(async({CallcutUserid,Roomid})=>{
-    console.log("call cut fired")
+   
       if(Roomid!==RoomId)
           return ;
       if(CallcutUserid.toString()!==user._id.toString())
@@ -168,7 +168,7 @@ function Room() {
       mystream.getTracks().forEach(track => track.stop());
     }
     
-    console.log(OutgoingUserId,IncomingUserId)
+    
     socket.emit(CALL_CUT,{CallcutUserid:user._id.toString()===OutgoingUserId?IncomingUserId:OutgoingUserId,RoomId})
     navigate("/")
   }

@@ -1,8 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { server } from "../../constants/config";
 
 const api = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({ baseUrl: `/api/v1/` }),
+  baseQuery: fetchBaseQuery({ baseUrl: `${server}/api/v1/`}),
   tagTypes: ["Chat", "User", "Message", "Dashboard","Dashboard-Users","Dashboard-Chats","Dashboard-Messages"],
   endpoints: (builder) => ({
     myChats: builder.query({
@@ -10,6 +11,7 @@ const api = createApi({
         url: "chat/mychats",
         credentials: "include",
       }),
+     
       providesTags: ["Chat"],
     }),
     searchUser: builder.query({
@@ -61,6 +63,8 @@ const api = createApi({
     getoldmessages: builder.query({
       query: ({ chatId, page = 1 }) => ({
         url: `chat/message/${chatId}?page=${page}`,
+        credentials: "include",
+
       }),
       keepUnusedDataFor: 0,
     }),

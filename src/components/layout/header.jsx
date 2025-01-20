@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { usernotExits } from "../../redux/reducers/auth";
 import { resetnotification } from "../../redux/reducers/chat";
 import { setisMobileMenu, setisNewGroup, setisNotification, setisSearch } from "../../redux/reducers/misc";
+import { server } from "../../constants/config";
 const Notification =lazy(()=>import ("../specific/notification")) ;
 const NewGrp =lazy(()=>import("../specific/newGrp")) ;
 const Search =lazy(()=>import ("../specific/search")) ;
@@ -56,7 +57,7 @@ function Header() {
     dispatch(resetnotification())
   }
   const Logouthandler = () => {
-    axios.post(`/api/v1/user/logout`).then(({data})=>{
+    axios.post(`${server}/api/v1/user/logout`,{},{withCredentials: true }).then(({data})=>{
       dispatch(usernotExits())
       toast.success("Logout successfull")}).catch((error)=>{toast.error(error?.response?.data?.message ||"Something went wrong")})
   };
@@ -70,7 +71,7 @@ function Header() {
               variant="h6"
               sx={{ display: { xs: "none", sm: "block" } }}
             >
-              CHATAPP
+              ChatApp
             </Typography>
             <Box sx={{ display: { xs: "block", sm: "none" } }}>
               <IconButton color="inherit" onClick={handlemobile}>
