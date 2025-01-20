@@ -63,7 +63,7 @@ const AppLayout = () => (WrappedComponent) => {
       if (!notificationRef.current) {
         
         notificationRef.current = new Audio(
-          "../../../public/notification-sound.mp3"
+          "../../../notification-sound.mp3"
         );
       }
 
@@ -130,7 +130,7 @@ const AppLayout = () => (WrappedComponent) => {
         const playRingtone = () => {
           if (!ringtoneRef.current) {
            
-            ringtoneRef.current = new Audio("../../../public/ringtone-126505.mp3");
+            ringtoneRef.current = new Audio("../../../ringtone-126505.mp3");
           }
     
           ringtoneRef.current.play().then(() => {
