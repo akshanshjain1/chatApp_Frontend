@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Dialog, IconButton, Stack, Typography } from "@mui/material";
 import {  Call as CallIcon } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { setisCallComing } from "../../redux/reducers/misc";
+import { setisCallComing, setNoofTryforConnection } from "../../redux/reducers/misc";
 import { getSocket } from "../../socket";
 import { CALL_ACCEPTED, CALL_REJECTED } from "../../constants/events";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +30,7 @@ function CallReceive({IncomingUser,ringtoneRef ,timerRef}) {
 
   }
   const callaccepted=async()=>{
+    dispatch(setNoofTryforConnection(1))
     dispatch(setisCallComing(false))
     
     stopRingtone()

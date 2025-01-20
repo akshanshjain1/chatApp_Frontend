@@ -13,7 +13,8 @@ const initialState = {
     groupChat: false,
   },
   isCallComing:false,
-  isCallingToSomeOne:false
+  isCallingToSomeOne:false,
+  NoOfTryforConnection:0
 };
 const miscSlice = createSlice({
   name: "misc",
@@ -52,6 +53,9 @@ const miscSlice = createSlice({
     },
     setisCallingToSomeOne:(state,action)=>{
       state.isCallingToSomeOne=action.payload
+    },
+    setNoofTryforConnection:(state,action)=>{
+      state.NoOfTryforConnection=action.payload
     }
   },
 });
@@ -67,6 +71,7 @@ export const {
   setuploadingLoader,
   setselectedDeleteChat,
   setisCallComing,
-  setisCallingToSomeOne
+  setisCallingToSomeOne,
+  setNoofTryforConnection
 } = miscSlice.actions;
 export default miscSlice;

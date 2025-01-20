@@ -16,7 +16,7 @@ import {
   TAKE_OFFER,
 } from "../constants/events";
 import { useSocketEvents } from "../hooks/hook";
-import { setisCallingToSomeOne } from "../redux/reducers/misc";
+import { setisCallingToSomeOne, setNoofTryforConnection } from "../redux/reducers/misc";
 import peer from "../services/peer";
 import { getSocket } from "../socket";
 function Room() {
@@ -161,6 +161,8 @@ function Room() {
       const remoteStream = ev.streams;
       setremotestream(remoteStream[0]);
     });
+
+   
   });
 
   const callcut=()=>{

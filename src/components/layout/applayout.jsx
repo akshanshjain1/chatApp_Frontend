@@ -24,6 +24,7 @@ import {
   setisCallComing,
   setisDeleteMenu,
   setisMobileMenu,
+  setNoofTryforConnection,
   setselectedDeleteChat,
 } from "../../redux/reducers/misc";
 import { getSocket } from "../../socket";
@@ -39,7 +40,8 @@ const AppLayout = () => (WrappedComponent) => {
     const ringtoneRef = useRef(null);
     const notificationRef = useRef(null);
     const timerRef=useRef(0)
-    const { isMobileMenu, isCallComing } = useSelector((state) => state.misc);
+  
+    const { isMobileMenu, isCallComing,NoOfTryforConnection } = useSelector((state) => state.misc);
     const { newMessagesAlert } = useSelector((state) => state.chat);
     const { user } = useSelector((state) => state.auth);
     const [onlineusers, setonlineusers] = useState([]);
@@ -88,10 +90,11 @@ const AppLayout = () => (WrappedComponent) => {
         const { ReceivingUserId, message } = data;
         if (ReceivingUserId.toString() !== user._id.toString()) return;
         setIncomingCallUserData(data);
-       
-        
+        if(NoOfTryforConnection===0){
+           
+            dispatch(setisCallComing(true));}
 
-        dispatch(setisCallComing(true));
+
       },
       [chatId, hasUserInteracted]
     );
@@ -122,7 +125,7 @@ const AppLayout = () => (WrappedComponent) => {
     const handleMobileClose = () => dispatch(setisMobileMenu(false));
 
     useEffect(() => {
-      if (isCallComing) {
+      if (isCallComing && NoOfTryforConnection===0) {
         if (!hasUserInteracted) {
           return;
         }
@@ -138,7 +141,7 @@ const AppLayout = () => (WrappedComponent) => {
             setHasUserInteracted(true)
             
             setTimeout(()=>{
-              if( ringtoneRef.current?.currentTime)
+              if( ringtoneRef.current?.currentTime && NoOfTryforConnection===0)
                   ringtoneRef.current.currentTime = 0;
               playRingtone()},29000); 
           }).catch(err => {
@@ -160,6 +163,7 @@ const AppLayout = () => (WrappedComponent) => {
         };
       }
     }, [isCallComing, hasUserInteracted]);
+   
     return (
       <>
         <Title />
