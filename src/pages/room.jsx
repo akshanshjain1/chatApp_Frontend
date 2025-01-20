@@ -191,7 +191,7 @@ function Room() {
         {remotestream && (
           <ReactPlayer
             playing
-            muted
+           
             height="60vh" // 60% of the viewport height
             width="60vw" // 60% of the viewport width
             style={{
@@ -233,7 +233,7 @@ function Room() {
           >
             <ReactPlayer
               playing
-              muted
+              
               width="100%"
               height="100%"
               url={mystream}
