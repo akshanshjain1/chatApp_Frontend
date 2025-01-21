@@ -12,6 +12,7 @@ import { SocketProvider } from "./socket";
 import { server } from './constants/config';
 
 
+
 const UserManagement = lazy(() => import("./pages/usermanagement"));
 const ChatManagement = lazy(() => import("./pages/chatmanagement"));
 const MessageManagement = lazy(() => import("./pages/messagemanagement"));
@@ -20,6 +21,7 @@ const NotFound = lazy(() => import("./pages/notfound"));
 const Group = lazy(() => import("./pages/group"));
 const Home = lazy(() => import("./pages/home"));
 const Login = lazy(() => import("./pages/login"));
+const Signup =lazy(()=>import ('./pages/signup')) ;
 const Chat = lazy(() => import("./pages/chat"));
 const AdminLogin = lazy(() => import("./pages/adminlogin"));
 
@@ -77,6 +79,14 @@ function App() {
             element={
               <ProtectRoute user={!user} redirect="/">
                 <Login/>
+              </ProtectRoute>
+            }
+          />
+           <Route
+            path="/signup"
+            element={
+              <ProtectRoute user={!user} redirect="/">
+                <Signup/>
               </ProtectRoute>
             }
           />

@@ -182,6 +182,14 @@ const api = createApi({
         },
         providesTags: ["Dashboard-Messages"],
       }),
+      signup: builder.mutation({
+        query: (formdata) => ({
+          url: `user/newuser`,
+          method: "POST",
+          credentials: "include",
+        }),
+        invalidatesTags: ["User"],
+      }),
   }),
 });
 export default api;
@@ -205,6 +213,7 @@ export const {
   useAdminstatsQuery,
   useAdminAllusersQuery,
   useAdminAllchatsQuery,
-  useAdminAllmessagesQuery
+  useAdminAllmessagesQuery,
+  useSignupMutation
 
 } = api;

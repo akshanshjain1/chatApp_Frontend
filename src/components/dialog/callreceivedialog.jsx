@@ -7,24 +7,25 @@ import { setisCallComing, setNoofTryforConnection } from "../../redux/reducers/m
 import { getSocket } from "../../socket";
 import { CALL_ACCEPTED, CALL_REJECTED } from "../../constants/events";
 import { useNavigate } from "react-router-dom";
-function CallReceive({IncomingUser,ringtoneRef ,timerRef}) {
+function CallReceive({IncomingUser,ringtoneRef ,timerRef,hasUserInteracted, setHasUserInteracted}) {
     const navigate=useNavigate()
-    
+     const {  isCallComing,NoOfTryforConnection } = useSelector((state) => state.misc);
      const stopRingtone = () => {
       if (ringtoneRef.current) {
           ringtoneRef.current.pause();
-          ringtoneRef.current.currentTime = 0; // Reset to the beginning
+          ringtoneRef.current.currentTime = 0;
+          ringtoneRef.current=null // Reset to the beginning
       }
   };
     
     const dispatch=useDispatch()
-  const { isCallComing } = useSelector((state) => state.misc);
+  
   const {user}=useSelector((state)=>state.auth)
     const socket=getSocket()
   const callrejected=async()=>{
     dispatch(setisCallComing(false))
     stopRingtone()
-    
+    dispatch(setNoofTryforConnection(1))
     socket.emit(CALL_REJECTED,{UserId:IncomingUser.UserId,Name:user.name})
 
 
@@ -38,6 +39,48 @@ function CallReceive({IncomingUser,ringtoneRef ,timerRef}) {
     navigate(`/room/${IncomingUser.RoomId}`)
   }
   
+
+  useEffect(() => {
+    if (isCallComing && NoOfTryforConnection===0) {
+      if (!hasUserInteracted) {
+        return;
+      }
+  
+      const playRingtone = () => {
+        if (!ringtoneRef.current) {
+         
+          ringtoneRef.current = new Audio("../../../ringtone-126505.mp3");
+        }
+  
+        ringtoneRef.current.play().then(() => {
+         
+          setHasUserInteracted(true)
+          
+          setTimeout(()=>{
+            if( ringtoneRef.current?.currentTime && NoOfTryforConnection===0)
+                ringtoneRef.current.currentTime = 0;
+            playRingtone()},29000); 
+        }).catch(err => {
+          console.error("Error playing ringtone: ", err);
+        });
+      };
+  
+      
+      playRingtone();
+  
+      
+      return () => {
+        if (ringtoneRef.current) {
+          ringtoneRef.current.pause();
+          if(ringtoneRef.current.currentTime)
+           ringtoneRef.current.currentTime = 0;
+          ringtoneRef.current = null;
+        }
+        dispatch(setNoofTryforConnection(1));
+        stopRingtone()
+      };
+    }
+  }, [isCallComing, hasUserInteracted]);
   return (
     <Dialog open={isCallComing}>
       <motion.div

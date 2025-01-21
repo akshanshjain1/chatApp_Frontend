@@ -124,45 +124,7 @@ const AppLayout = () => (WrappedComponent) => {
     };
     const handleMobileClose = () => dispatch(setisMobileMenu(false));
 
-    useEffect(() => {
-      if (isCallComing && NoOfTryforConnection===0) {
-        if (!hasUserInteracted) {
-          return;
-        }
     
-        const playRingtone = () => {
-          if (!ringtoneRef.current) {
-           
-            ringtoneRef.current = new Audio("../../../ringtone-126505.mp3");
-          }
-    
-          ringtoneRef.current.play().then(() => {
-           
-            setHasUserInteracted(true)
-            
-            setTimeout(()=>{
-              if( ringtoneRef.current?.currentTime && NoOfTryforConnection===0)
-                  ringtoneRef.current.currentTime = 0;
-              playRingtone()},29000); 
-          }).catch(err => {
-            console.error("Error playing ringtone: ", err);
-          });
-        };
-    
-        
-        playRingtone();
-    
-        
-        return () => {
-          if (ringtoneRef.current) {
-            ringtoneRef.current.pause();
-            if(ringtoneRef.current.currentTime)
-             ringtoneRef.current.currentTime = 0;
-            ringtoneRef.current = null;
-          }
-        };
-      }
-    }, [isCallComing, hasUserInteracted]);
    
     return (
       <>
@@ -215,6 +177,8 @@ const AppLayout = () => (WrappedComponent) => {
                 IncomingUser={IncomingCallUserData}
                 ringtoneRef={ringtoneRef}
                 timerRef={timerRef}
+                hasUserInteracted={hasUserInteracted}
+                setHasUserInteracted={setHasUserInteracted}
                 
               />
             )}

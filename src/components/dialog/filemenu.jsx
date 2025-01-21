@@ -67,7 +67,7 @@ function FileMenu({ anchorE1, chatId }) {
             <input
               type="file"
               multiple
-              accept="image/png, image/jpeg,image/gif"
+              accept="image/*"
               style={{ display: "none" }}
               onChange={(e) => filechangehandler(e, "Images")}
               ref={imageref}
@@ -80,7 +80,7 @@ function FileMenu({ anchorE1, chatId }) {
             <ListItemText sx={{ marginLeft: "0.5rem" }}>Audio</ListItemText>
             <input
               type="file"
-              accept="audio/mpeg, audio/wave"
+              accept="audio/*"
               multiple
               style={{ display: "none" }}
               onChange={(e) => filechangehandler(e, "Audios")}
@@ -94,7 +94,7 @@ function FileMenu({ anchorE1, chatId }) {
             <ListItemText sx={{ marginLeft: "0.5rem" }}>Video</ListItemText>
             <input
               type="file"
-              accept="video/mp4 video/webm, video/ogg"
+              accept="video/*"
               multiple
               style={{ display: "none" }}
               onChange={(e) => filechangehandler(e, "Videos")}
