@@ -90,7 +90,7 @@ function MessageManagement() {
         }))
       );
     }
-  },[]);
+  },[data]);
   return (
     <AdminLayout>
        {

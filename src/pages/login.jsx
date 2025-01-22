@@ -1,15 +1,13 @@
 import { useFileHandler, useInputValidation } from '6pp';
-import { CameraAlt } from '@mui/icons-material';
-import { Avatar, Button, Container, IconButton, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Button, Container, Paper, TextField, Typography } from '@mui/material';
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { VisuallyHiddenInput } from "../components/styles/styledcomponents";
+import { server } from '../constants/config';
 import { userExists } from "../redux/reducers/auth";
 import { usernamevalidater } from "../utils/validators";
-import { server } from '../constants/config';
 function Login(){
    
     const name=useInputValidation("")
@@ -88,6 +86,7 @@ function Login(){
                 </>
 
             )}
+            
 
         </Paper>
     </Container>)

@@ -120,7 +120,9 @@ function Chat({ chatId }) {
   };
   const newMessageshandler = useCallback(
     (data) => {
-      if (data?.chatId !== chatId) return;
+      
+      if (data?.message?.chatid !== chatId) return;
+      
       setmessages((prev) => {
         if (!prev.includes(data?.message)) return [...prev, data?.message];
       });

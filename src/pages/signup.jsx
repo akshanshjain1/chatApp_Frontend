@@ -19,8 +19,7 @@ import { VisuallyHiddenInput } from "../components/styles/styledcomponents";
 import { server } from "../constants/config";
 import { userExists } from "../redux/reducers/auth";
 import { usernamevalidater } from "../utils/validators";
-import { GoogleLogin } from "@react-oauth/google";
-import jwt_decode from "jwt-decode"
+
 function Signup() {
   const name = useInputValidation("");
   const username = useInputValidation("", usernamevalidater);
@@ -190,13 +189,7 @@ function Signup() {
             </form>
           </>
         }
-        <GoogleLogin
-        onSuccess={(res) => {
-          const dres=jwt_decode(res.credential);
-          console.log(dres)
-        }}
-        onError={() => toast.error("Signup Fail")}
-      />
+        
       </Paper>
       
     </Container>

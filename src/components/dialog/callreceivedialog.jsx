@@ -3,13 +3,13 @@ import { motion } from "framer-motion";
 import { Dialog, IconButton, Stack, Typography } from "@mui/material";
 import {  Call as CallIcon } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { setisCallComing, setNoofTryforConnection } from "../../redux/reducers/misc";
+import { setisCallComing, setRingtonePlayed } from "../../redux/reducers/misc";
 import { getSocket } from "../../socket";
 import { CALL_ACCEPTED, CALL_REJECTED } from "../../constants/events";
 import { useNavigate } from "react-router-dom";
 function CallReceive({IncomingUser,ringtoneRef ,timerRef,hasUserInteracted, setHasUserInteracted}) {
     const navigate=useNavigate()
-     const {  isCallComing,NoOfTryforConnection } = useSelector((state) => state.misc);
+     const {  isCallComing, ringtonePlayed} = useSelector((state) => state.misc);
      const stopRingtone = () => {
       if (ringtoneRef.current) {
           ringtoneRef.current.pause();
@@ -25,13 +25,13 @@ function CallReceive({IncomingUser,ringtoneRef ,timerRef,hasUserInteracted, setH
   const callrejected=async()=>{
     dispatch(setisCallComing(false))
     stopRingtone()
-    dispatch(setNoofTryforConnection(1))
+   
     socket.emit(CALL_REJECTED,{UserId:IncomingUser.UserId,Name:user.name})
 
 
   }
   const callaccepted=async()=>{
-    dispatch(setNoofTryforConnection(1))
+   
     dispatch(setisCallComing(false))
     
     stopRingtone()
@@ -41,32 +41,37 @@ function CallReceive({IncomingUser,ringtoneRef ,timerRef,hasUserInteracted, setH
   
 
   useEffect(() => {
-    if (isCallComing && NoOfTryforConnection===0) {
+    if(ringtonePlayed) {
+      stopRingtone()
+      return ;
+    }
+    if (isCallComing ) {
       if (!hasUserInteracted) {
         return;
       }
-  
+      
+      dispatch(setRingtonePlayed(true))
       const playRingtone = () => {
         if (!ringtoneRef.current) {
          
           ringtoneRef.current = new Audio("../../../ringtone-126505.mp3");
         }
-  
+        
         ringtoneRef.current.play().then(() => {
          
           setHasUserInteracted(true)
           
           setTimeout(()=>{
-            if( ringtoneRef.current?.currentTime && NoOfTryforConnection===0)
+            if( ringtoneRef.current?.currentTime)
                 ringtoneRef.current.currentTime = 0;
             playRingtone()},29000); 
         }).catch(err => {
           console.error("Error playing ringtone: ", err);
         });
       };
-  
       
-      playRingtone();
+      if(!ringtonePlayed)
+         playRingtone();
   
       
       return () => {
@@ -76,7 +81,7 @@ function CallReceive({IncomingUser,ringtoneRef ,timerRef,hasUserInteracted, setH
            ringtoneRef.current.currentTime = 0;
           ringtoneRef.current = null;
         }
-        dispatch(setNoofTryforConnection(1));
+        
         stopRingtone()
       };
     }

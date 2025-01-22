@@ -16,7 +16,7 @@ import {
   TAKE_OFFER,
 } from "../constants/events";
 import { useSocketEvents } from "../hooks/hook";
-import { setisCallingToSomeOne, setNoofTryforConnection } from "../redux/reducers/misc";
+import { setisCallingToSomeOne } from "../redux/reducers/misc";
 import peer from "../services/peer";
 import { getSocket } from "../socket";
 function Room() {
@@ -31,10 +31,10 @@ function Room() {
   const [mystream, setmystream] = useState();
   const [remotestream, setremotestream] = useState();
   const [callstarted, setcallstarted] = useState(false);
-
+  
   const initiaizestream = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
+      audio: true,  
       video: true,
     });
     setmystream(stream);
@@ -43,6 +43,7 @@ function Room() {
     ({ UserId, message }) => {
       if (UserId.toString() !== user._id.toString()) return;
       toast.error(message);
+     
       navigate("/");
     },
     [RoomId]
@@ -61,7 +62,7 @@ function Room() {
 
       socket.emit(TAKE_OFFER, { UserId, CallReceivingUserId, offer });
     },
-    [RoomId]
+    [socket]
   );
   const offersendbycallerhandler = useCallback(
     async ({ UserId, CallReceivingUserId, offer }) => {
@@ -71,7 +72,7 @@ function Room() {
       const ans = await peer.getAnswer(offer);
       socket.emit(OFFER_ACCEPTED, { UserId, CallReceivingUserId, ans });
     },
-    [RoomId]
+    [socket]
   );
 
   const handleNegofromcaller = useCallback(
@@ -85,29 +86,35 @@ function Room() {
         ans,
       });
     },
-    [RoomId]
+    [socket]
   );
 
   const handleNegofromCallerFinal = useCallback(
     async ({ OutgoingUserId, IncomingUserId, ans }) => {
+     
+     
+     
       await peer.setLocalDescription(ans);
       setcallstarted(true);
     },
-    [RoomId]
+    []
   );
 
-  const sendStream = useCallback(() => {
+  const sendStream = useCallback(async() => {
     for (const track of mystream.getTracks()) {
-      peer.peer.addTrack(track, mystream);
+     peer.peer.addTrack(track, mystream);
     }
   }, [mystream]);
   const offeracceptedhandler = useCallback(
-    async ({ UserId, CallReceivingUserId, ans }) => {
+   async  ({ UserId, CallReceivingUserId, ans }) => {
       if (UserId.toString() !== user._id.toString()) return;
-      peer.setLocalDescription(ans);
+      
+      
+     
+      await   peer.setLocalDescription(ans);
       sendStream();
     },
-    [RoomId, sendStream]
+    [sendStream]
   );
 
   const handlenegoneeded = useCallback(async () => {
@@ -117,7 +124,7 @@ function Room() {
       OutgoingUserId,
       IncomingUserId,
     });
-  });
+  },[IncomingUserId,socket]);
 
   const handleCallCut=useCallback(async({CallcutUserid,Roomid})=>{
    
@@ -130,6 +137,7 @@ function Room() {
       } 
      
       toast.success("Call Ended By Your Friend")
+     
       navigate("/")    
   },[RoomId])
 
@@ -147,6 +155,7 @@ function Room() {
 
   useEffect(() => {
     initiaizestream();
+   
   });
 
   useEffect(() => {
@@ -155,15 +164,16 @@ function Room() {
     return () => {
       peer.peer.removeEventListener("negotiationneeded", handlenegoneeded);
     };
-  });
+  },[handlenegoneeded]);
   useEffect(() => {
     peer.peer.addEventListener("track", async (ev) => {
       const remoteStream = ev.streams;
-      setremotestream(remoteStream[0]);
-    });
+      console.log("Got Tracks")
+     
+     setremotestream(remoteStream[0])
 
-   
-  });
+    })
+  },[]);
 
   const callcut=()=>{
     if (mystream) {
@@ -174,6 +184,7 @@ function Room() {
     socket.emit(CALL_CUT,{CallcutUserid:user._id.toString()===OutgoingUserId?IncomingUserId:OutgoingUserId,RoomId})
     navigate("/")
   }
+
   return (
     <Stack direction={"column"}>
       <motion.div

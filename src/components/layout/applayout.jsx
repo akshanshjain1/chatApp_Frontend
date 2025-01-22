@@ -24,7 +24,7 @@ import {
   setisCallComing,
   setisDeleteMenu,
   setisMobileMenu,
-  setNoofTryforConnection,
+  
   setselectedDeleteChat,
 } from "../../redux/reducers/misc";
 import { getSocket } from "../../socket";
@@ -41,7 +41,7 @@ const AppLayout = () => (WrappedComponent) => {
     const notificationRef = useRef(null);
     const timerRef=useRef(0)
   
-    const { isMobileMenu, isCallComing,NoOfTryforConnection } = useSelector((state) => state.misc);
+    const { isMobileMenu, isCallComing } = useSelector((state) => state.misc);
     const { newMessagesAlert } = useSelector((state) => state.chat);
     const { user } = useSelector((state) => state.auth);
     const [onlineusers, setonlineusers] = useState([]);
@@ -53,10 +53,11 @@ const AppLayout = () => (WrappedComponent) => {
     
     const newMessagesalerthandler = useCallback(async (data) => {
    
-      if (data?.chatId === chatId) return;
+      if (data?.message.chatid === chatId) return;
+      console.log(data)
       
       dispatch(setNewMessagesAlert(data));
-    }, []);
+    }, [chatId]);
     const newrequestalert = useCallback(async () => {
       if (!hasUserInteracted) {
         
@@ -90,12 +91,10 @@ const AppLayout = () => (WrappedComponent) => {
         const { ReceivingUserId, message } = data;
         if (ReceivingUserId.toString() !== user._id.toString()) return;
         setIncomingCallUserData(data);
-        if(NoOfTryforConnection===0){
-           
-            dispatch(setisCallComing(true));}
+        dispatch(setisCallComing(true));},
 
 
-      },
+      
       [chatId, hasUserInteracted]
     );
     const eventhandlers = {

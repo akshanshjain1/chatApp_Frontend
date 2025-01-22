@@ -14,7 +14,8 @@ const initialState = {
   },
   isCallComing:false,
   isCallingToSomeOne:false,
-  NoOfTryforConnection:0
+  ringtonePlayed:false
+ 
 };
 const miscSlice = createSlice({
   name: "misc",
@@ -54,9 +55,11 @@ const miscSlice = createSlice({
     setisCallingToSomeOne:(state,action)=>{
       state.isCallingToSomeOne=action.payload
     },
-    setNoofTryforConnection:(state,action)=>{
-      state.NoOfTryforConnection=action.payload
+    setRingtonePlayed:(state,action)=>{
+      state.ringtonePlayed=action.payload
+
     }
+    
   },
 });
 
@@ -72,6 +75,7 @@ export const {
   setselectedDeleteChat,
   setisCallComing,
   setisCallingToSomeOne,
-  setNoofTryforConnection
+  setRingtonePlayed
+  
 } = miscSlice.actions;
 export default miscSlice;

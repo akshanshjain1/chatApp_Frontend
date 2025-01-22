@@ -39,7 +39,7 @@ const adminLogout=createAsyncThunk("admin/logout",async()=>{
     try {
         
     
-        const {data}=await axios.post(`${server}/api/v1/admin/logout`,{withCredentials:true})
+        const {data}=await axios.post(`${server}/api/v1/admin/logout`,{},{withCredentials:true})
         
     
         return data.message
