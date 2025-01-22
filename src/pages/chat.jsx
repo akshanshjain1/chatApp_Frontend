@@ -120,7 +120,7 @@ function Chat({ chatId }) {
   };
   const newMessageshandler = useCallback(
     (data) => {
-      
+     
       if (data?.message?.chatid !== chatId) return;
       
       setmessages((prev) => {
@@ -226,7 +226,7 @@ function Chat({ chatId }) {
         {allmessages &&
           allmessages.length > 0 &&
           allmessages.map((i, index) => (
-            <Messagecomponent key={i._id} message={i} user={user} />
+            <Messagecomponent key={i._id || index} message={i} user={user} />
           ))}
         {UserTyping && <TypingLoader />}
         <div ref={bottomref} />

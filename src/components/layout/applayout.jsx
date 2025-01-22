@@ -52,9 +52,9 @@ const AppLayout = () => (WrappedComponent) => {
     const [hasUserInteracted, setHasUserInteracted] = useState(true);
     
     const newMessagesalerthandler = useCallback(async (data) => {
-   
-      if (data?.message.chatid === chatId) return;
-      console.log(data)
+    
+      if (data?.chatId === chatId) return;
+     
       
       dispatch(setNewMessagesAlert(data));
     }, [chatId]);
