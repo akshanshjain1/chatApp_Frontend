@@ -10,6 +10,7 @@ import {
   CALL_ACCEPTED,
   CALL_CUT,
   CALL_REJECTED,
+  ICE_CANDIDATE,
   OFFER_ACCEPTED,
   PEER_NEGOTIATION_DONE,
   PEER_NEGOTIATION_NEEDED,
@@ -19,6 +20,10 @@ import { useSocketEvents } from "../hooks/hook";
 import { setisCallingToSomeOne } from "../redux/reducers/misc";
 import peer from "../services/peer";
 import { getSocket } from "../socket";
+
+
+
+
 function Room() {
   const socket = getSocket();
   const navigate = useNavigate();
@@ -31,14 +36,40 @@ function Room() {
   const [mystream, setmystream] = useState();
   const [remotestream, setremotestream] = useState();
   const [callstarted, setcallstarted] = useState(false);
+  const [refresh,setrefresh]=useState(false)
+
   
-  const initiaizestream = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
+  const initiaizestream = useCallback( () => {
+     navigator.mediaDevices.getUserMedia({
       audio: true,  
       video: true,
+    }).then((stream)=>{
+      setmystream(stream);
+      peer.setlocalstream(stream)
+      console.log("local stream set")
     });
-    setmystream(stream);
-  };
+    ;
+  })
+  const sendStream=useCallback(()=>{
+    peer.setlocalstream(mystream)
+  })
+  const EndCall=()=>{
+   
+
+    // Loop through each track and stop it
+  
+        peer.peer.close();
+        let userid;
+                       if(user._id.toString()===IncomingUserId)
+                         userid=OutgoingUserId;
+                       else userid=IncomingUserId;
+
+        socket.emit(CALL_CUT,{CallcutUserid:userid,RoomId});
+        setmystream("");
+        toast.success("CALL ENDED");
+        navigate("/")
+        
+  }
   const callrejected = useCallback(
     ({ UserId, message }) => {
       if (UserId.toString() !== user._id.toString()) return;
@@ -49,7 +80,19 @@ function Room() {
     [RoomId]
   );
 
-  
+  const callcut=useCallback(({CallcutUserid,Roomid})=>{
+    if(RoomId!==Roomid)
+        return ;
+      if(CallcutUserid.toString()!==user._id.toString())
+          return ;
+        
+        setmystream(null)
+      peer.peer.close();
+      toast.success("Call Cut by Your Friend")
+      navigate("/")
+
+
+  },[socket])
   const callaccepted = useCallback(
     async ({ UserId, message, CallReceivingUserId }) => {
       if (UserId.toString() !== user._id.toString()) return;
@@ -58,9 +101,10 @@ function Room() {
       dispatch(setisCallingToSomeOne(false));
 
       toast.success(message);
-      const offer = await peer.getOffer();
-
-      socket.emit(TAKE_OFFER, { UserId, CallReceivingUserId, offer });
+      setcallstarted(true)
+      
+      const offer = await peer.getOffer()
+      socket.emit(TAKE_OFFER, { UserId, CallReceivingUserId, offer});
     },
     [socket]
   );
@@ -69,63 +113,40 @@ function Room() {
       if (CallReceivingUserId.toString() !== user._id.toString()) return;
       setOutgoingUserId(UserId)
       setIncomingUserId(CallReceivingUserId)
-      const ans = await peer.getAnswer(offer);
+     
+      // set remote description;
+      setcallstarted(true)
+     
+      const ans=await peer.getAnswer(offer)
+      
       socket.emit(OFFER_ACCEPTED, { UserId, CallReceivingUserId, ans });
     },
     [socket]
   );
 
-  const handleNegofromcaller = useCallback(
-    async ({ offer, OutgoingUserId, IncomingUserId }) => {
-      if (IncomingUserId.toString() !== user._id.toString()) return;
-      const ans = await peer.getAnswer(offer);
-      setcallstarted(true);
-      socket.emit(PEER_NEGOTIATION_DONE, {
-        OutgoingUserId,
-        IncomingUserId,
-        ans,
-      });
+  
+
+  
+
+  
+  const offeracceptedhandler = useCallback(
+   async  ({ UserId, CallReceivingUserId, ans }) => {
+        
+        await peer.setLocalDescription(ans)
+     
     },
     [socket]
   );
 
-  const handleNegofromCallerFinal = useCallback(
-    async ({ OutgoingUserId, IncomingUserId, ans }) => {
-     
-     
-     
-      await peer.setLocalDescription(ans);
-      setcallstarted(true);
-    },
-    []
-  );
+ 
 
-  const sendStream = useCallback(async() => {
-    for (const track of mystream.getTracks()) {
-     peer.peer.addTrack(track, mystream);
-    }
-  }, [mystream]);
-  const offeracceptedhandler = useCallback(
-   async  ({ UserId, CallReceivingUserId, ans }) => {
-      if (UserId.toString() !== user._id.toString()) return;
-      
-      
-     
-      await   peer.setLocalDescription(ans);
-      sendStream();
-    },
-    [sendStream]
-  );
-
-  const handlenegoneeded = useCallback(async () => {
-    const offer = await peer.getOffer();
-    socket.emit(PEER_NEGOTIATION_NEEDED, {
-      offer,
-      OutgoingUserId,
-      IncomingUserId,
-    });
-  },[IncomingUserId,socket]);
-
+    const handleicecandidate=useCallback(async({candidate,userid})=>{
+            
+            
+            await peer.setIceCandidate(candidate)
+            setrefresh(prev=>!prev)
+            setcallstarted(true)
+    },[socket])
   const handleCallCut=useCallback(async({CallcutUserid,Roomid})=>{
    
       if(Roomid!==RoomId)
@@ -146,9 +167,8 @@ function Room() {
     [CALL_ACCEPTED]: callaccepted,
     [TAKE_OFFER]: offersendbycallerhandler,
     [OFFER_ACCEPTED]: offeracceptedhandler,
-    [PEER_NEGOTIATION_NEEDED]: handleNegofromcaller,
-    [PEER_NEGOTIATION_DONE]: handleNegofromCallerFinal,
-    [CALL_CUT]:handleCallCut
+    [CALL_CUT]:callcut,
+    [ICE_CANDIDATE]:handleicecandidate
   };
 
   useSocketEvents(socket, eventhandlers);
@@ -158,32 +178,30 @@ function Room() {
    
   });
 
-  useEffect(() => {
-    peer.peer.addEventListener("negotiationneeded", handlenegoneeded);
-
-    return () => {
-      peer.peer.removeEventListener("negotiationneeded", handlenegoneeded);
-    };
-  },[handlenegoneeded]);
-  useEffect(() => {
-    peer.peer.addEventListener("track", async (ev) => {
-      const remoteStream = ev.streams;
-      console.log("Got Tracks")
-     
-     setremotestream(remoteStream[0])
-
-    })
-  },[]);
-
-  const callcut=()=>{
-    if (mystream) {
-      mystream.getTracks().forEach(track => track.stop());
-    }
-    
-    
-    socket.emit(CALL_CUT,{CallcutUserid:user._id.toString()===OutgoingUserId?IncomingUserId:OutgoingUserId,RoomId})
-    navigate("/")
+  useEffect(()=>{
+    peer.peer.onicecandidate=function(event){
+      if(event.candidate){
+        let userid;
+        if(user._id.toString()===IncomingUserId)
+          userid=OutgoingUserId;
+        else userid=IncomingUserId
+        setrefresh((prev)=>!prev)
+        socket.emit(ICE_CANDIDATE,{candidate:event.candidate,userid})
+      }
   }
+
+
+  })
+
+
+ useEffect(()=>{
+  peer.peer.ontrack=function(event){
+    console.log("GOT streams")
+    setremotestream(event.streams[0])
+  }
+ },[refresh])
+
+
 
   return (
     <Stack direction={"column"}>
@@ -278,7 +296,7 @@ function Room() {
             }}
             onClick={sendStream}
           >
-            Click here if Video not Coming
+            Click started
           </motion.button>
           <motion.div
             whileHover={{ scale: 1.1 }}
@@ -296,8 +314,8 @@ function Room() {
               border: "none",
               boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
             }}
-            onClick={callcut}
-          >
+            onClick={EndCall}
+          > 
             <IconButton sx={{
               color:"black "
             }}>
