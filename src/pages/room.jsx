@@ -40,7 +40,7 @@ function Room() {
   
   const initiaizestream = useCallback( async() => {
    
-   await   navigator.mediaDevices.getUserMedia({
+   await navigator.mediaDevices.getUserMedia({
       audio: true,  
       video: {
         width:{max:640,min:640},
@@ -205,6 +205,14 @@ function Room() {
  useEffect(()=>{
   peer.peer.ontrack=function(event){
     console.log("GOT streams")
+    event.streams[0].getAudioTracks().forEach((track) => {
+      console.log(`Track ID: ${track.id}, State: ${track.readyState}`);
+      if (track.readyState === "live") {
+          console.log("Audio track is live and active.");
+      } else {
+          console.log("Audio track is not live.");
+      }
+  })
     setremotestream(event.streams[0])
   }
  },[refresh])
@@ -297,10 +305,9 @@ function Room() {
       >
         <ReactPlayer
           playing
-         
-          height="100%"
+          muted={mute}
           url={remotestream}
-          style={{ borderRadius: "1rem" }}
+          style={{ borderRadius: "1rem" ,width:"100%",aspectRatio:16/9}}
         />
       </motion.div>
     )}
