@@ -41,7 +41,7 @@ const getorsavefromstorage=({key,value,get})=>{
     else  localStorage.setItem(key,JSON.stringify(value))
 }
 async function generateresponse(data){
-  console.log(googleapikey)
+ 
   const genAI = new GoogleGenerativeAI(googleapikey);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   
