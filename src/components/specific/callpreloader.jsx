@@ -14,7 +14,7 @@ Video calls now account for 70% of workplace communication, reducing the need fo
 Over 50% of users prefer platforms with AI noise cancellation, enhancing the experience of virtual meetings. | Noise-free innovation
 Focus on delivering an insightful and compelling fact with a clear and impactful crux.`;
     const response = await generateresponse(prompt);
-    console.log(response)
+   
     const [newfact,newcover]=response.split("|")
     setfact(newfact)
     setcover(newcover)
