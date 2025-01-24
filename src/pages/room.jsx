@@ -297,8 +297,7 @@ function Room() {
       >
         <ReactPlayer
           playing
-          muted={mute}
-          width="100%"
+         
           height="100%"
           url={remotestream}
           style={{ borderRadius: "1rem" }}
@@ -331,7 +330,9 @@ function Room() {
             cursor: "pointer",
             boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
           }}
-          onClick={()=>setmute(prev=>!prev)}
+          onClick={()=>{
+            
+            setmute(prev=>!prev)}}
         >
           <IconButton sx={{ color: "white" }}>
             {mute ? <MuteIcon/> : <UnMuteIcon/>}
