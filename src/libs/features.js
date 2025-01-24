@@ -1,5 +1,6 @@
 import moment from "moment";
-
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { googleapikey } from "../constants/config";
 const fileformat = (url) => {
   const fileExtention = url.split(".").pop().toString();
 
@@ -39,6 +40,21 @@ const getorsavefromstorage=({key,value,get})=>{
       return localStorage.getItem(key)?JSON.parse(localStorage.getItem(key)):null;
     else  localStorage.setItem(key,JSON.stringify(value))
 }
+async function generateresponse(data){
+  console.log(googleapikey)
+  const genAI = new GoogleGenerativeAI(googleapikey);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  
+  const prompt = data;
+  
+  const result = await model.generateContent(prompt);
+  return result.response.text();
+  }
 export { fileformat, transformimage, getlastsevendays,
-  getorsavefromstorage
+  getorsavefromstorage, generateresponse
  };
+
+
+
+
+

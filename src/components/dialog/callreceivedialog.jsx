@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Dialog, IconButton, Stack, Typography } from "@mui/material";
-import {  Call as CallIcon } from "@mui/icons-material";
+import {  Call as CallIcon , CallEnd as CallEndIcon } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { setisCallComing, setRingtonePlayed } from "../../redux/reducers/misc";
 import { getSocket } from "../../socket";
@@ -60,7 +60,7 @@ function CallReceive({IncomingUser,ringtoneRef ,timerRef,hasUserInteracted, setH
                     backgroundColor:"red"
                 }
             }}  onClick={callrejected}>
-              <CallIcon />
+              <CallEndIcon />
             </IconButton>
 
             <IconButton sx={{
