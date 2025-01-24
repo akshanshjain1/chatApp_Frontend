@@ -23,6 +23,7 @@ import { useSocketEvents } from "../hooks/hook";
 import { setisCallingToSomeOne } from "../redux/reducers/misc";
 import peer from "../services/peer";
 import { getSocket } from "../socket";
+import AudioPlayer from "../components/specific/audioplayer";
 
 function Room() {
   const socket = getSocket();
@@ -285,9 +286,10 @@ function Room() {
          border: "5px solid rgba(255, 255, 255, 0.4)",
        }}
      >
+        
        <ReactPlayer
          playing
-         muted={mute}
+         muted
          url={remotestream}
          onPlay={handleonPlay}
          style={{
@@ -296,6 +298,8 @@ function Room() {
            objectFit: "contain", // Ensures the video stays within bounds without cropping
          }}
        />
+       <AudioPlayer mediaStream={remotestream}/>
+       
      </motion.div>
      
       )}
@@ -315,25 +319,8 @@ function Room() {
             zIndex: 100,
           }}
         >
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              padding: "10px",
-              backgroundColor: "gray",
-              borderRadius: "50%",
-              cursor: "pointer",
-              boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
-            }}
-            onClick={() => {
-              setmute((prev) => !prev);
-            }}
-          >
-            <IconButton sx={{ color: "white" }}>
-              {mute ? <MuteIcon /> : <UnMuteIcon />}
-            </IconButton>
-          </motion.div>
-
+          
+          
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
