@@ -39,13 +39,13 @@ function Room() {
   const [callstarted, setcallstarted] = useState(false);
   const [refresh, setrefresh] = useState(false);
   const [mute, setmute] = useState(true);
-  const [mystreamurl,setmystreamurl]=useState();
-  const [remotestreamurl,setremotestreamurl]=useState()
+  const [mystreamurl, setmystreamurl] = useState();
+  const [remotestreamurl, setremotestreamurl] = useState();
   const initiaizestream = useCallback(async () => {
     await navigator.mediaDevices
       .getUserMedia({
         audio: true,
-        video:true
+        video: true,
       })
       .then((stream) => {
         console.log(stream);
@@ -55,9 +55,9 @@ function Room() {
       });
   });
 
-  const handleonPlay=()=>{
-    setmute(false)
-  }
+  const handleonPlay = () => {
+    setmute(false);
+  };
   const sendStream = useCallback(() => {
     peer.setlocalstream(mystream);
   });
@@ -259,7 +259,6 @@ function Room() {
         >
           <ReactPlayer
             playing
-            muted
             width="100%"
             height="100%"
             url={mystream}
@@ -269,39 +268,33 @@ function Room() {
       )}
 
       {remotestream && (
-       <motion.div
-       animate={{ opacity: 1 }}
-       initial={{ opacity: 0 }}
-       transition={{ duration: 0.6 }}
-       style={{
-         position: "fixed",
-         top: "50%",
-         left: "50%",
-           // Allow height to adjust automatically
-         transform: "translate(-50%, -50%)",
-         borderRadius: "1rem",
-         overflow: "hidden",
-         zIndex: 5,
-         boxShadow: "0px 12px 25px rgba(0, 0, 0, 0.7)",
-         border: "5px solid rgba(255, 255, 255, 0.4)",
-       }}
-     >
-        
-       <ReactPlayer
-         playing
-         muted
-         url={remotestream}
-         onPlay={handleonPlay}
-         style={{
-           borderRadius: "1rem",
+        <motion.div
+          animate={{ opacity: 1 }}
+          initial={{ opacity: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            // Allow height to adjust automatically
+            transform: "translate(-50%, -50%)",
+            borderRadius: "1rem",
+            overflow: "hidden",
+            zIndex: 5,
+            boxShadow: "0px 12px 25px rgba(0, 0, 0, 0.7)",
+            border: "5px solid rgba(255, 255, 255, 0.4)",
+          }}
+        >
+          <ReactPlayer
+            playing
+            url={remotestream}
+            style={{
+              borderRadius: "1rem",
               // Ensure the height adjusts according to the width
-           objectFit: "contain", // Ensures the video stays within bounds without cropping
-         }}
-       />
-       <AudioPlayer mediaStream={remotestream}/>
-       
-     </motion.div>
-     
+              objectFit: "contain", // Ensures the video stays within bounds without cropping
+            }}
+          />
+        </motion.div>
       )}
 
       {/* Call Controls */}
@@ -319,8 +312,6 @@ function Room() {
             zIndex: 100,
           }}
         >
-          
-          
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
