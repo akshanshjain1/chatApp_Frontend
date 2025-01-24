@@ -1,4 +1,4 @@
-import { CallEnd as CallEndIcon } from "@mui/icons-material";
+import { CallEnd as CallEndIcon, VolumeOff as MuteIcon, VolumeUp as UnMuteIcon } from "@mui/icons-material";
 import { IconButton, Stack } from "@mui/material";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
@@ -6,21 +6,19 @@ import toast from "react-hot-toast";
 import ReactPlayer from "react-player";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { CoverDemo } from "../components/specific/callpreloader";
 import {
   CALL_ACCEPTED,
   CALL_CUT,
   CALL_REJECTED,
   ICE_CANDIDATE,
   OFFER_ACCEPTED,
-  PEER_NEGOTIATION_DONE,
-  PEER_NEGOTIATION_NEEDED,
-  TAKE_OFFER,
+  TAKE_OFFER
 } from "../constants/events";
 import { useSocketEvents } from "../hooks/hook";
 import { setisCallingToSomeOne } from "../redux/reducers/misc";
 import peer from "../services/peer";
 import { getSocket } from "../socket";
-import { CoverDemo } from "../components/specific/callpreloader";
 
 
 
@@ -38,7 +36,7 @@ function Room() {
   const [remotestream, setremotestream] = useState();
   const [callstarted, setcallstarted] = useState(false);
   const [refresh,setrefresh]=useState(false)
-
+  const[mute,setmute]=useState(false)
   
   const initiaizestream = useCallback( async() => {
    
@@ -186,10 +184,7 @@ function Room() {
 
   useSocketEvents(socket, eventhandlers);
 
-  useEffect(() => {
-    
-   
-  });
+  
 
   useEffect(()=>{
     peer.peer.onicecandidate=function(event){
@@ -302,6 +297,7 @@ function Room() {
       >
         <ReactPlayer
           playing
+          muted={mute}
           width="100%"
           height="100%"
           url={remotestream}
@@ -325,6 +321,22 @@ function Room() {
           zIndex: 100,
         }}
       >
+          <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            padding: "10px",
+            backgroundColor: "gray",
+            borderRadius: "50%",
+            cursor: "pointer",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
+          }}
+          onClick={()=>setmute(prev=>!prev)}
+        >
+          <IconButton sx={{ color: "white" }}>
+            {mute ? <MuteIcon/> : <UnMuteIcon/>}
+          </IconButton>
+        </motion.div>
        
         <motion.div
           whileHover={{ scale: 1.1 }}
