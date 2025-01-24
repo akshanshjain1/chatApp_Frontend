@@ -44,10 +44,7 @@ function Room() {
     await navigator.mediaDevices
       .getUserMedia({
         audio: true,
-        video: {
-          width: { max: 640, min: 640 },
-          height: { max: 360, min: 360 },
-        },
+        video:true
       })
       .then((stream) => {
         console.log(stream);
