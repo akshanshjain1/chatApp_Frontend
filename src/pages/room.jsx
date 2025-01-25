@@ -1,7 +1,7 @@
 import {
   CallEnd as CallEndIcon,
-  VolumeOff as MuteIcon,
-  VolumeUp as UnMuteIcon,
+  VolumeOff,
+  VolumeUp
 } from "@mui/icons-material";
 import { IconButton, Stack } from "@mui/material";
 import { motion } from "framer-motion";
@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import ReactPlayer from "react-player";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { CoverDemo } from "../components/specific/callpreloader";
+import { LampDemo } from "../components/ui/lamp";
 import {
   CALL_ACCEPTED,
   CALL_CUT,
@@ -23,7 +23,6 @@ import { useSocketEvents } from "../hooks/hook";
 import { setisCallingToSomeOne } from "../redux/reducers/misc";
 import peer from "../services/peer";
 import { getSocket } from "../socket";
-import AudioPlayer from "../components/specific/audioplayer";
 
 function Room() {
   const socket = getSocket();
@@ -38,20 +37,24 @@ function Room() {
   const [remotestream, setremotestream] = useState();
   const [callstarted, setcallstarted] = useState(false);
   const [refresh, setrefresh] = useState(false);
-  const [mute, setmute] = useState(true);
+  const [mute, setmute] = useState(false);
   const [mystreamurl, setmystreamurl] = useState();
   const [remotestreamurl, setremotestreamurl] = useState();
   const initiaizestream = useCallback(async () => {
     await navigator.mediaDevices
       .getUserMedia({
         audio: true,
-        video: true,
+        video:{
+          width:{min:640,max:640 },
+          height:{min:360,max:360},
+      },
       })
       .then((stream) => {
-        console.log(stream);
+        
         setmystream(stream);
+        
         peer.setlocalstream(stream);
-        console.log("local stream set");
+        
       });
   });
 
@@ -171,119 +174,183 @@ function Room() {
   useEffect(() => {
     peer.peer.ontrack = function (event) {
       console.log("GOT streams");
-     
+      
+      const stream=event.streams[0];
+      const audioTracks = stream.getAudioTracks();
+    const videoTracks = stream.getVideoTracks();
+    console.log(audioTracks,videoTracks)
       setremotestream(event.streams[0]);
-    };
-  }, [refresh]);
+  }}, []);
+
+  let toggleMic = async () => {
+    setmute(prev=>!prev)
+    let audioTrack =remotestream.getTracks().find(track => track.kind === 'audio')
+
+    if(audioTrack.enabled){
+        audioTrack.enabled = false
+        
+    }else{
+        audioTrack.enabled = true
+       
+    }
+}
 
   return !callstarted ? (
-    <CoverDemo />
+    <LampDemo/>
   ) : (
     
-      <Stack direction={"column"}>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
+    <Stack
+    direction="column"
+    sx={{
+      position: "relative",
+      width: "100%",
+      height: "100vh",
+      overflow: "hidden",
+    }}
+  >
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.5 }}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: -1,
+        background:
+          "linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #fad0c4)", // Beautiful pastel tones
+        backgroundSize: "200% 200%",
+        animation: "gradientBackground 12s ease infinite", // Smooth background animation
+      }}
+    />
+
+    <style>
+      {`
+      @keyframes gradientBackground {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+    `}
+    </style>
+
+    {mystream && (
+      <motion.div
+        animate={{
+          width: remotestream ? "20%" : "100%",
+          height: remotestream ? "20%" : "100%",
+          bottom: remotestream ? "1rem" : "auto",
+          right: remotestream ? "1rem" : "auto",
+          top: remotestream ? "auto" : "50%",
+          left: remotestream ? "auto" : "50%",
+          transform: remotestream ? "none" : "translate(-50%, -50%)",
+        }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+        style={{
+          position: remotestream ? "fixed" : "absolute",
+          borderRadius: "1rem",
+          overflow: "hidden",
+          zIndex: remotestream ? 10 : 1,
+          boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.5)",
+          border: "4px solid rgba(255, 255, 255, 0.3)",
+        }}
+      >
+        <ReactPlayer
+          playing
+          muted
+          width="100%"
+          height="100%"
+          url={mystream}
+          style={{ borderRadius: "1rem" }}
+        />
+      </motion.div>
+    )}
+
+    {remotestream && (
+      <motion.div
+        animate={{ opacity: 1 }}
+        initial={{ opacity: 0 }}
+        transition={{ duration: 0.6 }}
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          // Allow height to adjust automatically
+          transform: "translate(-50%, -50%)",
+          borderRadius: "1rem",
+          overflow: "hidden",
+          zIndex: 5,
+          boxShadow: "0px 12px 25px rgba(0, 0, 0, 0.7)",
+          border: "5px solid rgba(255, 255, 255, 0.4)",
+        }}
+      >
+        <ReactPlayer
+          playing
+          muted={mute}
+          url={remotestream}
+          
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: -1,
-            background: "radial-gradient(circle, #0f2027, #203a43, #2c5364)",
-          }}
-        >
-          {remotestream && (
-            <ReactPlayer
-              playing
-             
-              height="80vh" // 60% of the viewport height
-              width="80vw" // 60% of the viewport width
-              style={{
-                position: "fixed",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                zIndex: -10000,
-                
-                
-                borderRadius: "1rem", // Optional: Adjust zIndex if needed
-              }}
-              url={remotestream}
-            />
-          )}
-  
-          {mystream && (
-            <motion.div
-              animate={{
-                width: isCallingToSomeOne ? "70%" : "35%",
-                height: isCallingToSomeOne ? "70%" : "35%",
-                bottom: !isCallingToSomeOne ? "0" : "auto",
-                right: !isCallingToSomeOne ? "0" : "auto",
-                top: !isCallingToSomeOne ? "auto" : "50%",
-                left: !isCallingToSomeOne ? "auto" : "50%",
-                transform: !isCallingToSomeOne ? "none" : "translate(-50%, -50%)",
-              }}
-              initial={false}
-              transition={{
-                duration: 0.5, // Smooth transition duration
-                ease: "easeInOut", // Animation easing
-              }}
-              style={{
-                position: !isCallingToSomeOne ? "fixed" : "absolute",
-                
-                borderRadius: "1rem",
-                overflow: "hidden",
-                zIndex: 10,
-              }}
-            >
-              <ReactPlayer
-                playing
-                
-                width="100%"
-                height="100%"
-                url={mystream}
-              />
-            </motion.div>
-          )}
-          {/* { isCallingToSomeOne && <GlobeDemo/>} */}
-        </motion.div>
-  
-        {callstarted && (
-          <Stack direction={"row"} justifyContent={"center"} alignItems={"center"} spacing={"1.5rem"} style={{position: "fixed",
-            bottom: "2rem",
-            left:"46%"
-            }}>
+            borderRadius: "1rem",
             
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                
-                padding: "10px 10px",
-                backgroundColor:"red",
-                
-                color: "black",
-                fontSize: "8px",
-                fontWeight: "bold",
-                borderRadius: "25px",
-                cursor: "pointer",
-                border: "none",
-                boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
-              }}
-              onClick={EndCall}
-            >
-              <IconButton sx={{
-                color:"black "
-              }}>
-                <CallEndIcon />
-              </IconButton>
-            </motion.div>
-          </Stack>
-        )}
+            objectFit: "contain", 
+          }}
+        />
+      </motion.div>
+    )}
+
+   
+    {callstarted && (
+      
+      <Stack
+        direction="row"
+        justifyContent="space-evenly"
+        alignItems="center"
+        spacing="2rem"
+        sx={{
+          position: "fixed",
+          bottom: "2rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 100,
+        }}
+      >
+        <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        style={{
+          padding: "10px",
+          backgroundColor: "gray",
+          borderRadius: "50%",
+          cursor: "pointer",
+          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
+        }}
+        onClick={toggleMic}
+      >
+        <IconButton sx={{ color: "white" }}>
+         { mute?<VolumeOff/> :<VolumeUp/>}
+        </IconButton>
+      </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            padding: "10px",
+            backgroundColor: "red",
+            borderRadius: "50%",
+            cursor: "pointer",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
+          }}
+          onClick={EndCall}
+        >
+          <IconButton sx={{ color: "white" }}>
+            <CallEndIcon />
+          </IconButton>
+        </motion.div>
       </Stack>
+    )}
+  </Stack>
     
   );
 }
