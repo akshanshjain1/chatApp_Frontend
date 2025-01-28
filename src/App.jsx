@@ -6,7 +6,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ProtectRoute from "./components/auth/protectroute";
 import Loaders from "./components/layout/loaders";
 import "./index.css";
-import Room from "./pages/room";
+
 import { userExists, usernotExits } from "./redux/reducers/auth";
 import { SocketProvider } from "./socket";
 import { server } from './constants/config';
@@ -24,6 +24,8 @@ const Login = lazy(() => import("./pages/login"));
 const Signup =lazy(()=>import ('./pages/signup')) ;
 const Chat = lazy(() => import("./pages/chat"));
 const AdminLogin = lazy(() => import("./pages/adminlogin"));
+const Room =lazy(()=>import( "./pages/room"));
+const AudioRoom=lazy(()=>import("./pages/audioRoom"))
 
 function App() {
 
@@ -73,6 +75,7 @@ function App() {
             <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/groups" element={<Group />} />
             <Route path="/room/:roomId" element={<Room/>}/>
+            <Route path="/audioroom/:roomId" element={<AudioRoom/>}/>
           </Route>
           <Route
             path="/login"

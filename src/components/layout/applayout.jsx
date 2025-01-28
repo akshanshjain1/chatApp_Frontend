@@ -46,6 +46,7 @@ const AppLayout = () => (WrappedComponent) => {
     const { user } = useSelector((state) => state.auth);
     const [onlineusers, setonlineusers] = useState([]);
     const [IncomingCallUserData, setIncomingCallUserData] = useState(null);
+    
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
     const socket = getSocket();
     const navigate = useNavigate();
@@ -91,7 +92,8 @@ const AppLayout = () => (WrappedComponent) => {
         const { ReceivingUserId, message } = data;
         if (ReceivingUserId.toString() !== user._id.toString()) return;
         setIncomingCallUserData(data);
-        dispatch(setisCallComing(true));},
+        dispatch(setisCallComing(true));
+      },
 
 
       
@@ -123,6 +125,14 @@ const AppLayout = () => (WrappedComponent) => {
     };
     const handleMobileClose = () => dispatch(setisMobileMenu(false));
 
+      useEffect(()=>{
+        return()=>{
+        
+          timerRef.current=null;
+          ringtoneRef.current=null;
+          setHasUserInteracted(true);
+        }
+      })
     
    
     return (

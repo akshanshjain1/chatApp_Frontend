@@ -1,7 +1,8 @@
 import { useInfiniteScrollTop } from "6pp";
 import {
   AttachFile as AttachFileIcon,
-  VideoCall as VideoCallIcon
+  VideoCall as VideoCallIcon,
+  Phone as PhoneIcon,
 } from "@mui/icons-material";
 import { IconButton, Skeleton, Stack } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -60,7 +61,7 @@ function Chat({ chatId }) {
   }, [messages, UserTyping]);
 
   const chatdetails = useGetchatdetailsQuery({ chatId });
-  
+
   const oldmessageschunk = useGetoldmessagesQuery({ chatId, page });
 
   const { data: oldmessages, setData: setoldmessages } = useInfiniteScrollTop(
@@ -76,7 +77,7 @@ function Chat({ chatId }) {
     { isError: oldmessageschunk.isError, error: oldmessageschunk.error },
   ];
   const members = chatdetails?.data?.chat?.members;
-  
+
   const sendmessage = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -97,21 +98,36 @@ function Chat({ chatId }) {
     }, 3000);
   };
 
-  const startvideocall=()=>{
-   
-    const RoomId=uuidv4();
-    socket.emit(CALLING,{UserId:user._id,ChatId:chatId,RoomId:RoomId.toString(),Name:user.name})
-  }
+  const startvideocall = () => {
+    const RoomId = uuidv4();
+    socket.emit(CALLING, {
+      UserId: user._id,
+      ChatId: chatId,
+      RoomId: RoomId.toString(),
+      Name: user.name,
+      type:"video"
+    });
+  };
+  const startaudiocall = () => {
+    const RoomId = uuidv4();
+    socket.emit(CALLING, {
+      UserId: user._id,
+      ChatId: chatId,
+      RoomId: RoomId.toString(),
+      Name: user.name,
+      type:"voice"
+    });
+  };
 
   useEffect(() => {
-    socket.emit(CHAT_JOINED,{userId:user._id,members})
+    socket.emit(CHAT_JOINED, { userId: user._id, members });
     dispatch(removeNewMessageAlert(chatId));
     return () => {
       setmessage("");
       setmessages([]);
       setpage(1);
       setoldmessages([]);
-      socket.emit(CHAT_LEAVED,{userId:user._id,members})
+      socket.emit(CHAT_LEAVED, { userId: user._id, members });
     };
   }, [chatId]);
   const handlefileopen = (e) => {
@@ -120,9 +136,8 @@ function Chat({ chatId }) {
   };
   const newMessageshandler = useCallback(
     (data) => {
-     
       if (data?.message?.chatid !== chatId) return;
-      
+
       setmessages((prev) => {
         if (!prev.includes(data?.message)) return [...prev, data?.message];
       });
@@ -149,10 +164,9 @@ function Chat({ chatId }) {
 
   const alertlistener = useCallback(
     (data) => {
-      if(data.chatId!==chatId) 
-              return; 
+      if (data.chatId !== chatId) return;
       const messageforrealtime = {
-        content:data.message,
+        content: data.message,
 
         sender: {
           _id: "jsdkl",
@@ -166,21 +180,26 @@ function Chat({ chatId }) {
     [chatId]
   );
 
-  const callreceivedatbackend=useCallback((data)=>{
-    const {RoomId,Forward}=data;
-    if(Forward){
-      dispatch(setisCallingToSomeOne(true))
-      navigate(`/room/${RoomId}`)}
-    else toast.error("Your Friend is Not Online")
-
-  },[navigate])
+  const callreceivedatbackend = useCallback(
+    (data) => {
+      const { RoomId, Forward,type } = data;
+      if (Forward) {
+        dispatch(setisCallingToSomeOne(true));
+        if(type==='video')
+            navigate(`/room/${RoomId}`);
+        else if(type==='voice')
+            navigate(`/audioroom/${RoomId}`) ;  
+      } else toast.error("Your Friend is Not Online");
+    },
+    [navigate]
+  );
   //Usecallback holds reference of a function
   const eventhandlers = {
     [ALERT]: alertlistener,
     [NEW_MESSAGE]: newMessageshandler,
     [START_TYPING]: starttypinghandlerlistner,
     [STOP_TYPING]: stoptypinghandlerlistner,
-    [CALLING]:callreceivedatbackend
+    [CALLING]: callreceivedatbackend,
   };
 
   useSocketEvents(socket, eventhandlers);
@@ -194,22 +213,35 @@ function Chat({ chatId }) {
   // });
   const oldmessagesextracted = oldmessages || [];
   const allmessages = [...oldmessagesextracted, ...messages];
-  
+
   useEffect(() => {
-    if ( !chatdetails.isLoading && !chatdetails?.data?.chat) {
-      
-       navigate("/");}
+    if (!chatdetails.isLoading && !chatdetails?.data?.chat) {
+      navigate("/");
+    }
   }, [chatdetails.data]);
   return chatdetails.isLoading ? (
     <Skeleton />
   ) : (
     <>
-      <Stack direction={"row"} justifyContent={"right"} height={"7%"} marginRight={"9%"} marginTop={"1%"}>
-        
-          <Button onClick={startvideocall} disabled={chatdetails?.data?.chat?.groupchat ||false}>
-          <VideoCallIcon/>  
-          </Button>
-        
+      <Stack
+        direction={"row"}
+        justifyContent={"right"}
+        height={"7%"}
+        marginRight={"9%"}
+        marginTop={"1%"}
+      >
+        <Button
+          onClick={startaudiocall}
+          disabled={chatdetails?.data?.chat?.groupchat || false}
+        >
+          <PhoneIcon />
+        </Button>
+        <Button
+          onClick={startvideocall}
+          disabled={chatdetails?.data?.chat?.groupchat || false}
+        >
+          <VideoCallIcon />
+        </Button>
       </Stack>
       <Stack
         ref={containerref}
@@ -222,7 +254,6 @@ function Chat({ chatId }) {
           overflowX: "hidden",
         }}
       >
-        
         {allmessages &&
           allmessages.length > 0 &&
           allmessages.map((i, index) => (

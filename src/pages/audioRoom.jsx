@@ -1,17 +1,17 @@
 import {
   CallEnd as CallEndIcon,
-  MicOffOutlined,
-  MicOutlined,
   VolumeOff,
   VolumeUp,
+  MicOffOutlined,
+  MicOutlined,
 } from "@mui/icons-material";
 import { IconButton, Stack } from "@mui/material";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import ReactPlayer from "react-player";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import AudioPlayer from "../components/specific/audioplayer";
 import { LampDemo } from "../components/ui/lamp";
 import {
   CALL_ACCEPTED,
@@ -25,8 +25,9 @@ import { useSocketEvents } from "../hooks/hook";
 import { setisCallingToSomeOne } from "../redux/reducers/misc";
 import peer from "../services/peer";
 import { getSocket } from "../socket";
+import Timer from "../components/specific/Timer";
 
-function Room() {
+function AudioRoom() {
   const socket = getSocket();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
@@ -40,14 +41,19 @@ function Room() {
   const [callstarted, setcallstarted] = useState(false);
   const [refresh, setrefresh] = useState(false);
   const [mute, setmute] = useState(false);
-  const [micmute,setmicmute]=useState(false)
+  const [startTime, setStartTime] = useState(null);
+  const [micmute, setmicmute] = useState(false);
+
   const initiaizestream = useCallback(async () => {
     await navigator.mediaDevices
       .getUserMedia({
-        audio: true,
-        video: {
-          width: { min: 640, max: 640 },
-          height: { min: 360, max: 360 },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 48000,
+          sampleSize: 16,
+          channelCount: 1,
         },
       })
       .then((stream) => {
@@ -71,6 +77,7 @@ function Room() {
     socket.emit(CALL_CUT, { CallcutUserid: userid, RoomId });
     mystream.getTracks().forEach((track) => track.stop());
     setmystream("");
+
     toast.success("CALL ENDED");
     navigate("/");
   };
@@ -116,7 +123,6 @@ function Room() {
       setOutgoingUserId(UserId);
       setIncomingUserId(CallReceivingUserId);
 
-      // set remote description;
       setcallstarted(true);
 
       const ans = await peer.getAnswer(offer);
@@ -154,30 +160,39 @@ function Room() {
   useSocketEvents(socket, eventhandlers);
 
   useEffect(() => {
-    peer.peer.onicecandidate = function (event) {
-      if (event.candidate) {
-        let userid;
-        if (user._id.toString() === IncomingUserId) userid = OutgoingUserId;
-        else userid = IncomingUserId;
-        setrefresh((prev) => !prev);
-        socket.emit(ICE_CANDIDATE, { candidate: event.candidate, userid });
-      }
-    };
+    if (peer.peer) {
+      peer.peer.onicecandidate = function (event) {
+        if (event.candidate) {
+          let userid;
+          if (user._id.toString() === IncomingUserId) userid = OutgoingUserId;
+          else userid = IncomingUserId;
+          setrefresh((prev) => !prev);
+          socket.emit(ICE_CANDIDATE, { candidate: event.candidate, userid });
+        }
+      };
+    }
   });
 
   useEffect(() => {
-    peer.peer.ontrack = function (event) {
-      console.log("GOT streams");
+    if (peer.peer) {
+      peer.peer.ontrack = function (event) {
+        console.log("GOT streams");
 
-      const stream = event.streams[0];
-      const audioTracks = stream.getAudioTracks();
-      const videoTracks = stream.getVideoTracks();
-      console.log(audioTracks, videoTracks);
-      setremotestream(event.streams[0]);
-    };
+        const stream = event.streams[0];
+        const audioTracks = stream.getAudioTracks();
+        const videoTracks = stream.getVideoTracks();
+        console.log(audioTracks, videoTracks);
+        setremotestream(event.streams[0]);
+      };
+    }
   }, []);
 
-  let toggleSound = async () => {
+  useEffect(() => {
+    if (remotestream) {
+      setStartTime(Date.now());
+    }
+  }, [remotestream]);
+  let toggleSpeaker = async () => {
     setmute((prev) => !prev);
     let audioTrack = remotestream
       .getTracks()
@@ -190,21 +205,19 @@ function Room() {
     }
   };
 
-  let toggleMic = async () => {
-
+  let toggleMic = () => {
+    setmicmute((prev) => !mystream.muted);
+    mystream.muted = !mystream.muted;
     const audioTrack = mystream.getAudioTracks()[0];
-        if (audioTrack) {
-          audioTrack.enabled = !audioTrack.enabled;
-          setmicmute(prev=>!prev)
-        }
-        peer.replaceTrack(
-          mystream.getTracks().find((track) => track.kind === "audio"),
-          audioTrack,
-          mystream
-        );
-
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+    }
+    peer.replaceTrack(
+      mystream.getTracks().find((track) => track.kind === "audio"),
+      audioTrack,
+      mystream
+    );
   };
-
   return !callstarted ? (
     <LampDemo />
   ) : (
@@ -229,82 +242,34 @@ function Room() {
           height: "100%",
           zIndex: -1,
           background:
-            "linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #fad0c4)", // Beautiful pastel tones
+            "linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #fad0c4)",
           backgroundSize: "200% 200%",
-          animation: "gradientBackground 12s ease infinite", // Smooth background animation
+          animation: "gradientBackground 12s ease infinite",
         }}
       />
 
       <style>
         {`
-      @keyframes gradientBackground {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-    `}
+        @keyframes gradientBackground {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}
       </style>
-
-      {mystream && (
-        <motion.div
-          animate={{
-            width: remotestream ? "20%" : "100%",
-            height: remotestream ? "20%" : "100%",
-            bottom: remotestream ? "1rem" : "auto",
-            right: remotestream ? "1rem" : "auto",
-            top: remotestream ? "auto" : "50%",
-            left: remotestream ? "auto" : "50%",
-            transform: remotestream ? "none" : "translate(-50%, -50%)",
-          }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-          style={{
-            position: remotestream ? "fixed" : "absolute",
-            borderRadius: "1rem",
-            overflow: "hidden",
-            zIndex: remotestream ? 10 : 1,
-            boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.5)",
-            border: "4px solid rgba(255, 255, 255, 0.3)",
-          }}
-        >
-          <ReactPlayer
-            playing
-            muted
-            width="100%"
-            height="100%"
-            url={mystream}
-            style={{ borderRadius: "1rem" }}
-          />
-        </motion.div>
-      )}
 
       {remotestream && (
         <motion.div
-          animate={{ opacity: 1 }}
-          initial={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
           style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            // Allow height to adjust automatically
-            transform: "translate(-50%, -50%)",
-            borderRadius: "1rem",
-            overflow: "hidden",
-            zIndex: 5,
-            boxShadow: "0px 12px 25px rgba(0, 0, 0, 0.7)",
-            border: "5px solid rgba(255, 255, 255, 0.4)",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <ReactPlayer
-            playing
-            muted={mute}
-            url={remotestream}
-            style={{
-              borderRadius: "1rem",
+          {startTime && <Timer startTime={startTime} />}
 
-              objectFit: "contain",
-            }}
-          />
+          <AudioPlayer mediaStream={remotestream} mute={mute} />
         </motion.div>
       )}
 
@@ -332,7 +297,7 @@ function Room() {
               cursor: "pointer",
               boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
             }}
-            onClick={toggleSound}
+            onClick={toggleSpeaker}
           >
             <IconButton sx={{ color: "white" }}>
               {mute ? <VolumeOff /> : <VolumeUp />}
@@ -351,7 +316,7 @@ function Room() {
             onClick={toggleMic}
           >
             <IconButton sx={{ color: "white" }}>
-              {micmute ? <MicOffOutlined /> : <MicOutlined />}
+              {mystream?.muted ? <MicOffOutlined /> : <MicOutlined />}
             </IconButton>
           </motion.div>
           <motion.div
@@ -375,4 +340,4 @@ function Room() {
     </Stack>
   );
 }
-export default Room;
+export default AudioRoom;

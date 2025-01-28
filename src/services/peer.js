@@ -1,6 +1,8 @@
 class PeerService{
     constructor(){
+        console.log("1")
         if(!this.peer){
+            console.log("new peer created")
             this.peer=new RTCPeerConnection({
                 iceServers:[
                     {
@@ -51,6 +53,15 @@ class PeerService{
                   })
             }
         }
+
+        closePeer(){
+            if(this.peer){
+                this.peer.close();
+                this.peer=null; 
+            }
+        }
+
+        
 }
 
 export default new PeerService()

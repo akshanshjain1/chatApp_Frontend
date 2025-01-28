@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-const AudioPlayer = ({ mediaStream }) => {
+const AudioPlayer = ({ mediaStream ,mute=false}) => {
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -9,7 +9,7 @@ const AudioPlayer = ({ mediaStream }) => {
       audioRef.current.play().catch((error) => console.error("Error playing audio:", error));
     }
 
-    // Cleanup on component unmount
+    
     return () => {
       if (audioRef.current) {
         audioRef.current.srcObject = null;
@@ -19,7 +19,7 @@ const AudioPlayer = ({ mediaStream }) => {
 
   return (
     <div style={{display:"flex",flexDirection:"row",alignItems:"center",justifyContent:"center"}}>
-      <audio ref={audioRef} controls  />
+      <audio ref={audioRef}  muted={mute}  />
     </div>
   );
 };
