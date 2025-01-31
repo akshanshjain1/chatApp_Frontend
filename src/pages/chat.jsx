@@ -1,8 +1,8 @@
 import { useInfiniteScrollTop } from "6pp";
 import {
   AttachFile as AttachFileIcon,
-  VideoCall as VideoCallIcon,
   Phone as PhoneIcon,
+  VideoCall as VideoCallIcon,
 } from "@mui/icons-material";
 import { IconButton, Skeleton, Stack } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -19,11 +19,9 @@ import { PlaceholdersAndVanishInput } from "../components/ui/placeholders-and-va
 import {
   ALERT,
   CALLING,
-  CHAT_JOINED,
-  CHAT_LEAVED,
   NEW_MESSAGE,
   START_TYPING,
-  STOP_TYPING,
+  STOP_TYPING
 } from "../constants/events";
 import { friendMessages } from "../constants/suggestion";
 import { useErrors, useSocketEvents } from "../hooks/hook";
@@ -105,7 +103,7 @@ function Chat({ chatId }) {
       ChatId: chatId,
       RoomId: RoomId.toString(),
       Name: user.name,
-      type:"video"
+      type: "video",
     });
   };
   const startaudiocall = () => {
@@ -115,19 +113,17 @@ function Chat({ chatId }) {
       ChatId: chatId,
       RoomId: RoomId.toString(),
       Name: user.name,
-      type:"voice"
+      type: "voice",
     });
   };
 
   useEffect(() => {
-    socket.emit(CHAT_JOINED, { userId: user._id, members });
     dispatch(removeNewMessageAlert(chatId));
     return () => {
       setmessage("");
       setmessages([]);
       setpage(1);
       setoldmessages([]);
-      socket.emit(CHAT_LEAVED, { userId: user._id, members });
     };
   }, [chatId]);
   const handlefileopen = (e) => {
@@ -182,13 +178,11 @@ function Chat({ chatId }) {
 
   const callreceivedatbackend = useCallback(
     (data) => {
-      const { RoomId, Forward,type } = data;
+      const { RoomId, Forward, type } = data;
       if (Forward) {
         dispatch(setisCallingToSomeOne(true));
-        if(type==='video')
-            navigate(`/room/${RoomId}`);
-        else if(type==='voice')
-            navigate(`/audioroom/${RoomId}`) ;  
+        if (type === "video") navigate(`/room/${RoomId}`);
+        else if (type === "voice") navigate(`/audioroom/${RoomId}`);
       } else toast.error("Your Friend is Not Online");
     },
     [navigate]

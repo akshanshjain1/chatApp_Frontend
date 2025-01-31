@@ -7,6 +7,8 @@ import Header from "./header";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
+  CHAT_JOINED,
+  CHAT_LEAVED,
   NEW_MESSAGES_ALERT,
   NEW_REQUEST,
   ONLINE_USERS,
@@ -24,7 +26,6 @@ import {
   setisCallComing,
   setisDeleteMenu,
   setisMobileMenu,
-  
   setselectedDeleteChat,
 } from "../../redux/reducers/misc";
 import { getSocket } from "../../socket";
@@ -39,36 +40,33 @@ const AppLayout = () => (WrappedComponent) => {
     const deletemenuanchor = useRef(null);
     const ringtoneRef = useRef(null);
     const notificationRef = useRef(null);
-    const timerRef=useRef(0)
-  
+    const timerRef = useRef(0);
+
     const { isMobileMenu, isCallComing } = useSelector((state) => state.misc);
     const { newMessagesAlert } = useSelector((state) => state.chat);
     const { user } = useSelector((state) => state.auth);
     const [onlineusers, setonlineusers] = useState([]);
     const [IncomingCallUserData, setIncomingCallUserData] = useState(null);
-    
+
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
     const socket = getSocket();
     const navigate = useNavigate();
     const [hasUserInteracted, setHasUserInteracted] = useState(true);
-    
-    const newMessagesalerthandler = useCallback(async (data) => {
-    
-      if (data?.chatId === chatId) return;
-     
-      
-      dispatch(setNewMessagesAlert(data));
-    }, [chatId]);
+
+    const newMessagesalerthandler = useCallback(
+      async (data) => {
+        if (data?.chatId === chatId) return;
+
+        dispatch(setNewMessagesAlert(data));
+      },
+      [chatId]
+    );
     const newrequestalert = useCallback(async () => {
       if (!hasUserInteracted) {
-        
         return;
       }
       if (!notificationRef.current) {
-        
-        notificationRef.current = new Audio(
-          "../../../notification-sound.mp3"
-        );
+        notificationRef.current = new Audio("../../../notification-sound.mp3");
       }
 
       notificationRef.current.play();
@@ -95,8 +93,6 @@ const AppLayout = () => (WrappedComponent) => {
         dispatch(setisCallComing(true));
       },
 
-
-      
       [chatId, hasUserInteracted]
     );
     const eventhandlers = {
@@ -110,6 +106,13 @@ const AppLayout = () => (WrappedComponent) => {
     useSocketEvents(socket, eventhandlers);
 
     useErrors([{ isError, error }]);
+    useEffect(() => {
+      socket.emit(CHAT_JOINED, { userId: user._id });
+
+      return () => {
+        socket.emit(CHAT_LEAVED, { userId: user._id });
+      };
+    }, []);
 
     useEffect(() => {
       getorsavefromstorage({
@@ -118,23 +121,20 @@ const AppLayout = () => (WrappedComponent) => {
       });
     }, [newMessagesAlert]);
     const handledeletechat = (e, _id, groupChat) => {
-      
       deletemenuanchor.current = e.currentTarget;
       dispatch(setisDeleteMenu(true));
       dispatch(setselectedDeleteChat({ chatId: _id.toString(), groupChat }));
     };
     const handleMobileClose = () => dispatch(setisMobileMenu(false));
 
-      useEffect(()=>{
-        return()=>{
-        
-          timerRef.current=null;
-          ringtoneRef.current=null;
-          setHasUserInteracted(true);
-        }
-      })
-    
-   
+    useEffect(() => {
+      return () => {
+        timerRef.current = null;
+        ringtoneRef.current = null;
+        setHasUserInteracted(true);
+      };
+    });
+
     return (
       <>
         <Title />
@@ -188,7 +188,6 @@ const AppLayout = () => (WrappedComponent) => {
                 timerRef={timerRef}
                 hasUserInteracted={hasUserInteracted}
                 setHasUserInteracted={setHasUserInteracted}
-                
               />
             )}
             <WrappedComponent {...props} chatId={chatId} />
