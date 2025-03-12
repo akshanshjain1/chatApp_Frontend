@@ -71,7 +71,7 @@ function Header() {
               variant="h6"
               sx={{ display: { xs: "none", sm: "block" } }}
             >
-              ChatApp
+              Chatkaro
             </Typography>
             <Box sx={{ display: { xs: "block", sm: "none" } }}>
               <IconButton color="inherit" onClick={handlemobile}>
