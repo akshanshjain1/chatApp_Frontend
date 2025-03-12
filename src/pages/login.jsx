@@ -1,94 +1,154 @@
-import { useFileHandler, useInputValidation } from '6pp';
-import { Button, Container, Paper, TextField, Typography } from '@mui/material';
+import { useInputValidation } from "6pp";
 import axios from "axios";
+import { signInWithPopup } from "firebase/auth";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { FaGoogle, FaLock, FaUser } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { server } from '../constants/config';
+import "reactflow/dist/style.css";
+import { server } from "../constants/config";
 import { userExists } from "../redux/reducers/auth";
-import { usernamevalidater } from "../utils/validators";
-function Login(){
-   
-    const name=useInputValidation("")
-    const username=useInputValidation("",usernamevalidater)
-    const password=useInputValidation("")
-    const bio=useInputValidation("")
-    const dispatch=useDispatch()
-    const avatar=useFileHandler("single")
-    const navigate=useNavigate()
-    const [isloading,setisloading]=useState(false)
-    //const password=useStrongPassword() for strong password use this
-   const handleLogin =async(e)=>{
-    e.preventDefault()
-    
-       
-        const config={
-            withCredentials:true,
-            "Content-Type":"application/json"
-        }
-        try {
-        setisloading(true)
-         const {data}=  await axios.post(`${server}/api/v1/user/login`,{
-                username:username.value,
-                password:password.value
-            },config);
-            dispatch(userExists(data.data))
-            toast.success(data.message)
-            navigate("/")
-            
-            
-        } catch (error) {
-          
-            toast.error(error?.response?.data?.message?.data||"Something went wrong")
-        }
-        finally{
-            setisloading(false)
-        }
+import { auth, provider } from "../services/firebaseConfig";
+function Login() {
+  const username = useInputValidation("");
+  const password = useInputValidation("");
+  const [isloading, setisloading] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    const config = {
+      withCredentials: true,
+      "Content-Type": "application/json",
     };
-    
-    
-    return(
-    <Container component={"main"} maxWidth="xs" sx={{display:'flex' , flexDirection:'column',alignItems:'center',justifyContent:"center",height:"100vh"}} height="100vh">
-        <Paper elevation={3} sx={{padding:4, display:'flex',flexDirection:'column',alignItems:'center'}}>
-            {(
+    try {
+      setisloading(true);
+      const { data } = await axios.post(
+        `${server}/api/v1/user/login`,
+        {
+          username: username.value,
+          password: password.value,
+        },
+        config
+      );
+      dispatch(userExists(data.data));
+      toast.success(data.message);
+      navigate("/chatroom");
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message?.data || "Something went wrong"
+      );
+    } finally {
+      setisloading(false);
+    }
+  };
 
-                <>
-                <Typography variant="hs">Login</Typography>
-                <form onSubmit={handleLogin} >
-                    <TextField
-                    required
-                    fullWidth
-                    label="username"
-                    margin="normal"
-                    variant="outlined"
-                    value={username.value}
-                    onChange={username.changeHandler}/>
-                    <TextField
-                    required
-                    fullWidth
-                    label="password"
-                    type="password"
-                    margin="normal"
-                    variant="outlined"
-                    value={password.value}
-                    onChange={password.changeHandler}/>
-                    
+  const handleGoogleLogin = async () => {
+    try {
+      // await loginWithPopup(); // Use popup instead of redirect
+      // const userToken = await getAccessTokenSilently();
+      // console.log("Access Token:", userToken);
+      // console.log(user)
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-                    <Button variant="contained" color="primary" type="submit" sx={{marginTop:'1rem',textAlign:"center" }} fullWidth disabled={isloading}>
-                    {
-                        isloading?("Logging in"):("Log in")
-                    }
-                    </Button>
-                    <Typography textAlign="center"  marginTop={`1rem`}>Or</Typography>
-                    <Button sx={{marginTop:'1rem'}} fullWidth variant="text"  onClick={()=>navigate("/signup")} disabled={isloading}>Sign up</Button>
-                </form>
-                </>
+      const { data } = await axios.post(
+        `${server}/api/v1/user/auth0-login`,
+        {
+          email: user.email,
+          name: user.displayName,
+          authtype: "google",
+          avatar: user.photoURL,
+        },
+        { withCredentials: true }
+      );
 
-            )}
-            
+      dispatch(userExists(data.data));
+      toast.success(data.message);
+      navigate("/chatroom");
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
 
-        </Paper>
-    </Container>)
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 p-4">
+      <div className="w-full max-w-md bg-white/80 backdrop-blur-lg p-8 rounded-2xl shadow-xl border border-gray-200">
+        <h2 className="text-3xl font-bold text-gray-800 text-center">
+          Welcome Back to Chatkaro
+        </h2>
+        <p className="text-gray-500 text-center mt-2">Login to continue</p>
+
+        {/* Manual Login Form */}
+        <form className="mt-6 space-y-5" onSubmit={handleLogin}>
+          <div className="relative">
+            <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+            <input
+              type="text"
+              placeholder="Username"
+              value={username.value}
+              required
+              onChange={username.changeHandler}
+              className="w-full pl-12 pr-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+          <div className="relative">
+            <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password.value}
+              required
+              onChange={password.changeHandler}
+              className="w-full pl-12 pr-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg text-white font-semibold text-base transition duration-300 ease-in-out shadow-md hover:shadow-lg"
+          >
+            Login
+          </button>
+        </form>
+        <div className="text-[0.9rem] flex flex-row justify-end pt-[0.6rem]">
+          <a href="/forgot-password" className="text-blue-600 text-right">
+            Forgot password
+          </a>
+        </div>
+        {/* Divider */}
+        <div className="flex items-center my-6">
+          <div className="w-full h-[1px] bg-gray-300"></div>
+          <span className="px-3 text-gray-500 text-base">OR</span>
+          <div className="w-full h-[1px] bg-gray-300"></div>
+        </div>
+
+        {/* Social Login Buttons */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 bg-red-500 hover:bg-red-600 py-3 rounded-lg text-white font-semibold text-base transition duration-300 ease-in-out shadow-md hover:shadow-lg"
+          >
+            <FaGoogle className="text-lg" /> Login with Google
+          </button>
+          {/* <button
+          onClick={handleFacebookLogin}
+          className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 py-3 rounded-lg text-white font-semibold text-base transition duration-300 ease-in-out shadow-md hover:shadow-lg"
+        >
+          <FaFacebook className="text-lg" /> Login with Facebook
+        </button> */}
+        </div>
+        <div className="text-center mt-4">
+          <span
+            className="inline-block px-6 py-3 text-blue-600 font-semibold border border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white transition duration-300 cursor-pointer"
+            onClick={() => navigate("/signup")}
+          >
+            Sign Up
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
-export default Login
+export default Login;

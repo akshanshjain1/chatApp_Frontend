@@ -11,6 +11,8 @@ import { userExists, usernotExits } from "./redux/reducers/auth";
 import { SocketProvider } from "./socket";
 import { server } from './constants/config';
 
+const HomePage =lazy(()=>import( './pages/Homepage'));
+
 
 
 const UserManagement = lazy(() => import("./pages/usermanagement"));
@@ -26,7 +28,8 @@ const Chat = lazy(() => import("./pages/chat"));
 const AdminLogin = lazy(() => import("./pages/adminlogin"));
 const Room =lazy(()=>import( "./pages/room"));
 const AudioRoom=lazy(()=>import("./pages/audioRoom"))
-
+const ResetPassword =lazy(()=>import( './pages/resetpassword'));
+const ForgotPassword =lazy(()=>import( './pages/forgotpassword'));
 function App() {
 
   const dispatch=useDispatch()
@@ -69,18 +72,26 @@ function App() {
         <Routes>
           <Route element={
             <SocketProvider>
-              <ProtectRoute user={user} redirect="/login"/>
+              <ProtectRoute user={user} redirect="/"/>
             </SocketProvider>}>
-            <Route path="/" element={<Home />} />
+            <Route path="/chatroom" element={<Home />} />
             <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/groups" element={<Group />} />
             <Route path="/room/:roomId" element={<Room/>}/>
             <Route path="/audioroom/:roomId" element={<AudioRoom/>}/>
           </Route>
           <Route
+            path="/"
+            element={
+              <ProtectRoute user={!user} redirect="/chatroom">
+                <HomePage/>
+              </ProtectRoute>
+            }
+          />
+           <Route
             path="/login"
             element={
-              <ProtectRoute user={!user} redirect="/">
+              <ProtectRoute user={!user} redirect="/chatroom">
                 <Login/>
               </ProtectRoute>
             }
@@ -88,8 +99,24 @@ function App() {
            <Route
             path="/signup"
             element={
-              <ProtectRoute user={!user} redirect="/">
+              <ProtectRoute user={!user} redirect="/chatroom">
                 <Signup/>
+              </ProtectRoute>
+            }
+          />
+           <Route
+            path="/forgot-password"
+            element={
+              <ProtectRoute user={!user} redirect="/chatroom">
+                <ForgotPassword/>
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/reset-password/:token"
+            element={
+              <ProtectRoute user={!user} redirect="/chatroom">
+                <ResetPassword/>
               </ProtectRoute>
             }
           />

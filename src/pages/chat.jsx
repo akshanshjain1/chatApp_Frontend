@@ -4,7 +4,7 @@ import {
   Phone as PhoneIcon,
   VideoCall as VideoCallIcon,
 } from "@mui/icons-material";
-import { IconButton, Skeleton, Stack } from "@mui/material";
+import { IconButton, Skeleton, Stack, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -237,12 +237,17 @@ function Chat({ chatId }) {
           <VideoCallIcon />
         </Button>
       </Stack>
+      <Stack height={"8%"} sx={{alignItems:"center" , justifyContent:"center"}}>
+  <Typography style={{ color: "#4CAF50", fontWeight: "bold" , textAlign:"center"} }>
+    Messages are securely sent with end-to-end encryption.
+  </Typography>
+</Stack>
       <Stack
         ref={containerref}
         boxSizing={"border-box"}
         padding={"1rem"}
         spacing={"1rem"}
-        height={"82%"}
+        height={"74%"}
         sx={{
           overflowY: "auto",
           overflowX: "hidden",

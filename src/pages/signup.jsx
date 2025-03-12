@@ -25,6 +25,7 @@ function Signup() {
   const username = useInputValidation("", usernamevalidater);
   const password = useInputValidation("");
   const bio = useInputValidation("");
+  const email=useInputValidation("")
   const dispatch = useDispatch();
   const avatar = useFileHandler("single");
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ function Signup() {
     formdata.append("password", password.value);
     formdata.append("username", username.value);
     formdata.append("bio", bio.value);
+    formdata.append("email",email.value)
     formdata.append("avatar", avatar.file);
 
     try {
@@ -55,7 +57,7 @@ function Signup() {
     } catch (error) {
       console.log(error);
       toast.error(
-        error?.response?.data?.message?.data || "Something went wrong"
+        error?.response?.data?.message || "Something went wrong"
       );
     } finally {
       setisloading(false);
@@ -147,6 +149,20 @@ function Signup() {
               {username?.error && (
                 <Typography color="error" variant=" caption">
                   {username?.error}
+                </Typography>
+              )}
+              <TextField
+                required
+                fullWidth
+                label="email"
+                margin="normal"
+                variant="outlined"
+                value={email.value}
+                onChange={email.changeHandler}
+              />  
+              {email?.error && (
+                <Typography color="error" variant=" caption">
+                  {email?.error}
                 </Typography>
               )}
               <TextField
