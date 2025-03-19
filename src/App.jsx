@@ -11,6 +11,7 @@ import { userExists, usernotExits } from "./redux/reducers/auth";
 import { SocketProvider } from "./socket";
 import { server } from './constants/config';
 
+
 const HomePage =lazy(()=>import( './pages/Homepage'));
 
 
@@ -28,6 +29,7 @@ const Chat = lazy(() => import("./pages/chat"));
 const AdminLogin = lazy(() => import("./pages/adminlogin"));
 const Room =lazy(()=>import( "./pages/room"));
 const AudioRoom=lazy(()=>import("./pages/audioRoom"))
+const LiveLocation =lazy(()=>import('./pages/LiveLocation')) ;
 const ResetPassword =lazy(()=>import( './pages/resetpassword'));
 const ForgotPassword =lazy(()=>import( './pages/forgotpassword'));
 function App() {
@@ -79,6 +81,8 @@ function App() {
             <Route path="/groups" element={<Group />} />
             <Route path="/room/:roomId" element={<Room/>}/>
             <Route path="/audioroom/:roomId" element={<AudioRoom/>}/>
+            <Route path="/live-location/:locationId" element={<LiveLocation/>}/>
+
           </Route>
           <Route
             path="/"

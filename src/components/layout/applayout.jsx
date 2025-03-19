@@ -13,6 +13,7 @@ import {
   NEW_REQUEST,
   ONLINE_USERS,
   REFETCH_CHATS,
+  SOME_ONE_SENDING_LIVE_LOCATION,
   SOMEONE_CALLING,
 } from "../../constants/events";
 import { useErrors, useSocketEvents } from "../../hooks/hook";
@@ -25,6 +26,7 @@ import {
 import {
   setisCallComing,
   setisDeleteMenu,
+  setisLiveLocationComing,
   setisMobileMenu,
   setselectedDeleteChat,
 } from "../../redux/reducers/misc";
@@ -32,6 +34,7 @@ import { getSocket } from "../../socket";
 import DeleteChatMenu from "../dialog/deletechatmenu";
 import Profile from "../specific/profile";
 import CallReceive from "../dialog/callreceivedialog";
+import LiveLocationDialog from "../dialog/livelocationdialog";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
@@ -42,7 +45,7 @@ const AppLayout = () => (WrappedComponent) => {
     const notificationRef = useRef(null);
     const timerRef = useRef(0);
 
-    const { isMobileMenu, isCallComing } = useSelector((state) => state.misc);
+    const { isMobileMenu, isCallComing,isLiveLocationComing } = useSelector((state) => state.misc);
     const { newMessagesAlert } = useSelector((state) => state.chat);
     const { user } = useSelector((state) => state.auth);
     const [onlineusers, setonlineusers] = useState([]);
@@ -52,7 +55,7 @@ const AppLayout = () => (WrappedComponent) => {
     const socket = getSocket();
     const navigate = useNavigate();
     const [hasUserInteracted, setHasUserInteracted] = useState(true);
-
+    const [LiveLocationInfo,setLiveLocationInfo]=useState(null)
     const newMessagesalerthandler = useCallback(
       async (data) => {
         if (data?.chatId === chatId) return;
@@ -95,12 +98,22 @@ const AppLayout = () => (WrappedComponent) => {
 
       [chatId, hasUserInteracted]
     );
+
+    const handlelivelocation=useCallback(({UserId,message,ChatId,ReceivingUserId,locationId})=>{
+      if(ReceivingUserId.toString()!==user._id.toString())
+          return;
+        dispatch(setisLiveLocationComing(true));
+        setLiveLocationInfo((prev)=>({UserId,message,ChatId,ReceivingUserId,locationId}));
+
+
+  },[socket])
     const eventhandlers = {
       [NEW_MESSAGES_ALERT]: newMessagesalerthandler,
       [NEW_REQUEST]: newrequestalert,
       [REFETCH_CHATS]: refetchlistner,
       [ONLINE_USERS]: onlineuserslistner,
       [SOMEONE_CALLING]: callreceivehandler,
+      [SOME_ONE_SENDING_LIVE_LOCATION]:handlelivelocation
     };
 
     useSocketEvents(socket, eventhandlers);
@@ -190,6 +203,16 @@ const AppLayout = () => (WrappedComponent) => {
                 setHasUserInteracted={setHasUserInteracted}
               />
             )}
+            { isLiveLocationComing && (
+              <LiveLocationDialog 
+                open={isLiveLocationComing}
+                LiveLocationInfo={LiveLocationInfo}
+                setLiveLocationInfo={setLiveLocationInfo}
+              
+              />
+            )
+
+            }
             <WrappedComponent {...props} chatId={chatId} />
           </Grid>
 

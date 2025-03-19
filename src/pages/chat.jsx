@@ -21,7 +21,7 @@ import {
   CALLING,
   NEW_MESSAGE,
   START_TYPING,
-  STOP_TYPING
+  STOP_TYPING,
 } from "../constants/events";
 import { friendMessages } from "../constants/suggestion";
 import { useErrors, useSocketEvents } from "../hooks/hook";
@@ -32,6 +32,7 @@ import {
 import { removeNewMessageAlert } from "../redux/reducers/chat";
 import { setisCallingToSomeOne, setisFileMenu } from "../redux/reducers/misc";
 import { getSocket } from "../socket";
+import LiveLocationButton from "../components/specific/livelocationbutton";
 
 function Chat({ chatId }) {
   const containerref = useRef(null);
@@ -187,6 +188,9 @@ function Chat({ chatId }) {
     },
     [navigate]
   );
+
+  
+
   //Usecallback holds reference of a function
   const eventhandlers = {
     [ALERT]: alertlistener,
@@ -194,6 +198,7 @@ function Chat({ chatId }) {
     [START_TYPING]: starttypinghandlerlistner,
     [STOP_TYPING]: stoptypinghandlerlistner,
     [CALLING]: callreceivedatbackend,
+    
   };
 
   useSocketEvents(socket, eventhandlers);
@@ -223,7 +228,9 @@ function Chat({ chatId }) {
         height={"7%"}
         marginRight={"9%"}
         marginTop={"1%"}
+        gap={"5px"}
       >
+        <LiveLocationButton disabled={chatdetails?.data?.chat?.groupchat || false} chatId={chatId}/>
         <Button
           onClick={startaudiocall}
           disabled={chatdetails?.data?.chat?.groupchat || false}
@@ -237,11 +244,16 @@ function Chat({ chatId }) {
           <VideoCallIcon />
         </Button>
       </Stack>
-      <Stack height={"8%"} sx={{alignItems:"center" , justifyContent:"center"}}>
-  <Typography style={{ color: "#4CAF50", fontWeight: "bold" , textAlign:"center"} }>
-    Messages are securely sent with end-to-end encryption.
-  </Typography>
-</Stack>
+      <Stack
+        height={"8%"}
+        sx={{ alignItems: "center", justifyContent: "center" }}
+      >
+        <Typography
+          style={{ color: "#4CAF50", fontWeight: "bold", textAlign: "center" }}
+        >
+          Messages are securely sent with end-to-end encryption.
+        </Typography>
+      </Stack>
       <Stack
         ref={containerref}
         boxSizing={"border-box"}

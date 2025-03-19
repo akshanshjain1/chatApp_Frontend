@@ -14,7 +14,7 @@ function CallReceive({
   hasUserInteracted,
   setHasUserInteracted,
 }) {
-  console.log(IncomingUser)
+
   const navigate = useNavigate();
   const { isCallComing, ringtonePlayed } = useSelector((state) => state.misc);
   const calltype = IncomingUser?.type;
