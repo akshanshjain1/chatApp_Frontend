@@ -34,13 +34,13 @@ const LiveLocationDialog = ({ open,LiveLocationInfo,setLiveLocationInfo }) => {
 
   return (
     <Dialog open={open} TransitionComponent={Transition} keepMounted >
-      <div className="bg-gray-900 text-white rounded-lg shadow-xl p-4 w-[400px]">
+      <div className="bg-gray-900 text-white rounded-lg shadow-xl p-4 w-[300px] md:w-[400px]">
         <DialogTitle className="text-lg font-semibold flex items-center gap-2">
           <FaMapMarkerAlt className="text-red-500" /> Live Location Request
         </DialogTitle>
 
         <DialogContent>
-          <p className="text-gray-300">🚀 {LiveLocationInfo?.message}</p>
+          <p className="text-gray-300"> {LiveLocationInfo?.message}</p>
 
           
         </DialogContent>
