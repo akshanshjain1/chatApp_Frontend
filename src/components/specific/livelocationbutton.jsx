@@ -7,13 +7,13 @@ import { useCallback } from "react";
 import { useSocketEvents } from "../../hooks/hook";
 import toast from "react-hot-toast";
 import { LIVE_LOCATION_REQ_ACCEPTED, REJECT_LIVE_LOCATION, SEND_LIVE_LOCATION_NOTIFICATION } from "../../constants/events";
-import { setisSendingLiveLocation } from "../../redux/reducers/misc";
+
 const LiveLocationButton = ({ chatId,disabled=false }) => {
   const socket = getSocket();
   const user=useSelector((state)=>{
     return state.auth.user;
   })
-    const dispatch=useDispatch()
+    
     const navigate=useNavigate();
    
   const handleShareLocation = () => {

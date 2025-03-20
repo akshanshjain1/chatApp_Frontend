@@ -16,7 +16,7 @@ const initialState = {
   isCallingToSomeOne:false,
   ringtonePlayed:false,
   isLiveLocationComing:false,
-  isSendingLiveLocation:false
+  
  
 };
 const miscSlice = createSlice({
@@ -64,9 +64,7 @@ const miscSlice = createSlice({
     setisLiveLocationComing:(state,action)=>{
       state.isLiveLocationComing=action.payload
     },
-    setisSendingLiveLocation:(state,action)=>{
-      state.isSendingLiveLocation=action.payload
-    }
+    
     
   },
 });
@@ -85,7 +83,7 @@ export const {
   setisCallingToSomeOne,
   setRingtonePlayed,
   setisLiveLocationComing,
-  setisSendingLiveLocation
+  
   
 } = miscSlice.actions;
 export default miscSlice;
