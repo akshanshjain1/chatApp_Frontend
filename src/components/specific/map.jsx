@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap,useMapEvents} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Map, Globe, Mountain, LocateFixed } from "lucide-react";
@@ -39,11 +39,12 @@ const MapComponent = ({ location }) => {
   const [mapCenter, setMapCenter] = useState([DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lng]);
   const [zoom, setZoom] = useState(location ? 18 : 8);
   const [selectedLayer, setSelectedLayer] = useState("Streets");
-
+ 
   useEffect(() => {
     setIsClient(true);
     if (location) {
       setMapCenter([location.lat, location.lng]);
+      
     }
   }, [location]);
 

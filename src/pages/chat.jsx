@@ -14,6 +14,7 @@ import FileMenu from "../components/dialog/filemenu";
 import AppLayout from "../components/layout/applayout";
 import { TypingLoader } from "../components/layout/loaders";
 import Messagecomponent from "../components/shared/messagecomponent";
+import LiveLocationButton from "../components/specific/livelocationbutton";
 import { Button } from "../components/ui/moving-borders";
 import { PlaceholdersAndVanishInput } from "../components/ui/placeholders-and-vanish-input";
 import {
@@ -32,7 +33,6 @@ import {
 import { removeNewMessageAlert } from "../redux/reducers/chat";
 import { setisCallingToSomeOne, setisFileMenu } from "../redux/reducers/misc";
 import { getSocket } from "../socket";
-import LiveLocationButton from "../components/specific/livelocationbutton";
 
 function Chat({ chatId }) {
   const containerref = useRef(null);

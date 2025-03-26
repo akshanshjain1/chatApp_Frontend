@@ -10,6 +10,7 @@ import "./index.css";
 import { userExists, usernotExits } from "./redux/reducers/auth";
 import { SocketProvider } from "./socket";
 import { server } from './constants/config';
+const  AIChat =lazy (()=>import('./pages/ai-chat'));
 
 
 const HomePage =lazy(()=>import( './pages/Homepage'));
@@ -78,6 +79,7 @@ function App() {
             </SocketProvider>}>
             <Route path="/chatroom" element={<Home />} />
             <Route path="/chat/:chatId" element={<Chat />} />
+            <Route path="/ai-chat/:chatId" element={<AIChat/>}/>
             <Route path="/groups" element={<Group />} />
             <Route path="/room/:roomId" element={<Room/>}/>
             <Route path="/audioroom/:roomId" element={<AudioRoom/>}/>
