@@ -114,23 +114,24 @@ import { getSocket } from "../socket";
       direction="row"
       justifyContent="left"
       alignItems="center"
-      height="8%"
+      height="8vh"
       className="relative px-6 py-3 w-full bg-black shadow-lg overflow-hidden"
+      style={{ background: "none" }}
     >
       {/* Background Animated Lines */}
-      <div className="absolute inset-0 z-0">
-        <div className="h-full w-full animate-moving-lines"></div>
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="h-full w-full animate-moving-lines opacity-40 mix-blend-overlay"></div>
       </div>
 
       {/* Logo */}
       <img
         src="/ChatKaroAIProfilePhoto.webp"
         alt="ChatKaroAI Logo"
-        className="h-[calc(8vh*0.75)] w-[calc(8vh*0.75)] rounded-full object-cover shadow-lg border border-cyan-400 z-10"
+        className="h-[calc(8vh*0.75)] w-[calc(8vh*0.75)] rounded-full object-cover shadow-lg border border-cyan-400 relative z-1000"
       />
 
       {/* Brand Name with Futuristic Effect */}
-      <span className="ml-3 text-2xl font-semibold tracking-wide text-cyan-300 relative z-10 font-tech">
+      <span className="ml-3 text-[1.1rem] md:text-[1.3rem] lg:text-[1.5rem] font-semibold tracking-wide text-cyan-300 relative z-1000 font-tech">
         ChatKaroAI
       </span>
 
@@ -141,18 +142,23 @@ import { getSocket } from "../socket";
 
           .font-tech {
             font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
           }
 
           @keyframes moving-lines {
             0% { background-position: 0 0; }
-            100% { background-position: 100% 100%; }
+            100% { background-position: 200% 200%; }
           }
 
           .animate-moving-lines {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 255, 255, 0));
-            background-size: 200% 200%;
-            animation: moving-lines 5s linear infinite;
+            background: repeating-linear-gradient(
+              135deg,
+              rgba(0, 255, 255, 0.2) 0px,
+              rgba(0, 255, 255, 0.1) 10px,
+              transparent 20px
+            );
+            background-size: 300% 300%;
+            animation: moving-lines 6s linear infinite;
           }
         `}
       </style>
