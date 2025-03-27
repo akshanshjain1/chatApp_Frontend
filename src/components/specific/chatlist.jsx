@@ -41,7 +41,7 @@ function ChatList({
                 position: "relative",
               }}
             >
-              <AvatarCard avatar={["/path/to/chatkaro_ai_avatar.png"]}/>
+              <AvatarCard avatar={["/ChatKaroAIProfilePhoto.webp"]}/>
               <Stack>
                 <Typography>{"Chatkaro AI"}</Typography>
                 
