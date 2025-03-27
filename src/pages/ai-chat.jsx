@@ -59,14 +59,20 @@ import { getSocket } from "../socket";
         createdAt: new Date().toISOString(),
       }])
      try {
+      setUserTyping(true)
         const response=await axios.post(`${server}/api/v1/chat/ai-chat`,
             {sessionId:chatId,prompt:message},{withCredentials:true})
-
-        
+          setUserTyping(false)
+          
         response.data.sender={name:"ChatKaroAI",_id:"kjdksaldas"}
+        
+        
         setallmessages(prev=>[...prev,response.data])
      } catch (error) {
         console.log(error)
+     }
+     finally{
+      setUserTyping(false)
      }
      //console.log(message);
    };
@@ -105,7 +111,7 @@ import { getSocket } from "../socket";
    <Stack
            direction={"row"}
            justifyContent={"right"}
-           height={"7%"}
+           height={"8%"}
            marginRight={"9%"}
            marginTop={"1%"}
            gap={"5px"}
@@ -113,22 +119,13 @@ import { getSocket } from "../socket";
            ChatKaroAI
            
          </Stack>
-         <Stack
-           height={"8%"}
-           sx={{ alignItems: "center", justifyContent: "center" }}
-         >
-           <Typography
-             style={{ color: "#4CAF50", fontWeight: "bold", textAlign: "center" }}
-           >
-             Messages are securely sent with end-to-end encryption.
-           </Typography>
-         </Stack>
+         
          <Stack
            ref={containerref}
            boxSizing={"border-box"}
            padding={"1rem"}
            spacing={"1rem"}
-           height={"74%"}
+           height={"82%"}
            sx={{
              overflowY: "auto",
              overflowX: "hidden",
@@ -137,7 +134,7 @@ import { getSocket } from "../socket";
            {allmessages &&
              allmessages.length > 0 &&
              allmessages.map((i, index) => (
-               <Messagecomponent key={i._id || index} message={i} user={user} />
+               <Messagecomponent key={i._id || index} message={i} user={user} format={false}/>
              ))}
            {UserTyping && <TypingLoader />}
            <div ref={bottomref} />
