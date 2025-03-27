@@ -1,6 +1,6 @@
 'use client';
 
-import { Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

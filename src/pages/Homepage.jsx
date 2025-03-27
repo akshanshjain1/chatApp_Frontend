@@ -180,7 +180,7 @@ function HomePage() {
   return (
     <div className="relative">
       <nav
-        className={`fixed top-0 left-0 w-full px-[3%] py-[1%] flex items-center justify-between transition-all duration-500 sm:h-[15%] md:h-[10%] z-50 ${
+        className={`fixed top-0 left-0 w-full px-[3%] py-[1%] flex items-center justify-between transition-all duration-500 h-[13%] md:h-[10%] z-50 ${
           showNavbar
             ? "bg-opacity-50 backdrop-blur-md shadow-lg"
             : "bg-transparent"
@@ -191,7 +191,7 @@ function HomePage() {
             <div className="absolute left-0 top-1/2 h-1 w-36 bg-blue-500 blur-lg animate-lightBeam"></div>
           )}
           <h1
-            className={`sm:text-[1.5rem] md:text-2xl font-mono tracking-wide text-blue-500 ${
+            className={`text-[1.3rem] md:text-[1.6rem]  font-mono tracking-wide text-blue-500 ${
               showNavbar ? "opacity-100" : "opacity-0"
             }`}
           >
@@ -199,7 +199,7 @@ function HomePage() {
           </h1>
         </div>
         <button
-          className="px-6 py-[0.7%] border-transparent cursor-pointer text-sm sm:text-sm md:text-base bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-all"
+          className="px-6 py-[1.4%] h-[60%] md:h-full lg:h-[70%] border-transparent cursor-pointer text-sm sm:text-sm md:text-base bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-all text-center flex justify-center items-center"
           onClick={() => navigate("/login")}
         >
           Login
