@@ -114,8 +114,8 @@ import { getSocket } from "../socket";
       direction="row"
       justifyContent="left"
       alignItems="center"
-      height="8vh"
-      className="relative px-6 py-3 w-full bg-black shadow-lg overflow-hidden"
+      height="8%"
+      className="relative px-6  w-full bg-black shadow-lg overflow-hidden"
       style={{ background: "none" }}
     >
       {/* Background Animated Lines */}
