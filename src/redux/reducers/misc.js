@@ -16,6 +16,8 @@ const initialState = {
   isCallingToSomeOne:false,
   ringtonePlayed:false,
   isLiveLocationComing:false,
+  isAllowSmartReply:false,
+  isShowSmartReply:false
   
  
 };
@@ -64,6 +66,12 @@ const miscSlice = createSlice({
     setisLiveLocationComing:(state,action)=>{
       state.isLiveLocationComing=action.payload
     },
+    setisAllowSmartReply:(state,action)=>{
+      state.isAllowSmartReply=action.payload
+    },
+    setisShowSmartReply:(state,action)=>{
+      state.isShowSmartReply=action.payload
+    }
     
     
   },
@@ -83,6 +91,8 @@ export const {
   setisCallingToSomeOne,
   setRingtonePlayed,
   setisLiveLocationComing,
+  setisAllowSmartReply,
+  setisShowSmartReply
   
   
 } = miscSlice.actions;

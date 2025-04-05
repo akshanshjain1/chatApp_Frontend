@@ -1,4 +1,5 @@
-import { Add as AddIcon, Group as GroupIcon, Logout as LogoutIcon, Menu as MenuIcon, Notifications as NotificationIcon, Search as SearchIcon } from "@mui/icons-material";
+import { Add as AddIcon, Group as GroupIcon, Logout as LogoutIcon, Menu as MenuIcon, Notifications as NotificationIcon, Search as SearchIcon,Settings as SettingsIcon } from "@mui/icons-material";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {
   AppBar,
   Backdrop,
@@ -17,8 +18,9 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { usernotExits } from "../../redux/reducers/auth";
 import { resetnotification } from "../../redux/reducers/chat";
-import { setisMobileMenu, setisNewGroup, setisNotification, setisSearch } from "../../redux/reducers/misc";
+import { setisAllowSmartReply, setisMobileMenu, setisNewGroup, setisNotification, setisSearch } from "../../redux/reducers/misc";
 import { server } from "../../constants/config";
+import SmartReply from "../specific/allowSmartReply";
 const Notification =lazy(()=>import ("../specific/notification")) ;
 const NewGrp =lazy(()=>import("../specific/newGrp")) ;
 const Search =lazy(()=>import ("../specific/search")) ;
@@ -37,7 +39,7 @@ const IconBtn = ({ title, Icon, onClick,value }) => {
 function Header() {
   const navigate = useNavigate();
   
-  const {isSearch,isNotification,isNewGroup}=useSelector((state)=>state.misc)
+  const {isSearch,isNotification,isNewGroup,isAllowSmartReply}=useSelector((state)=>state.misc)
   const {notificationcount}=useSelector((state)=>state.chat)
   
   
@@ -55,6 +57,9 @@ function Header() {
   const openNotification=()=>{
     dispatch(setisNotification(true))
     dispatch(resetnotification())
+  }
+  const openSmartReplyConsent=()=>{
+    dispatch(setisAllowSmartReply(true))
   }
   const Logouthandler = () => {
     axios.post(`${server}/api/v1/user/logout`,{},{withCredentials: true }).then(({data})=>{
@@ -102,6 +107,11 @@ function Header() {
                   value={notificationcount}
                 />
                 <IconBtn
+                  title={"Smart Reply"}
+                  onClick={openSmartReplyConsent}
+                  Icon={AutoAwesomeIcon}
+                />
+                <IconBtn
                   title={"Logout"}
                   onClick={Logouthandler}
                   Icon={LogoutIcon}
@@ -129,6 +139,13 @@ function Header() {
         isNewGroup && (
             <Suspense fallback={<Backdrop open/>}>
             <NewGrp/>
+            </Suspense>
+        )
+      }
+      {
+        isAllowSmartReply && (
+          <Suspense fallback={<Backdrop open/>}>
+            <SmartReply/>
             </Suspense>
         )
       }

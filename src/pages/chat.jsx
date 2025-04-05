@@ -4,7 +4,14 @@ import {
   Phone as PhoneIcon,
   VideoCall as VideoCallIcon,
 } from "@mui/icons-material";
-import { IconButton, Skeleton, Stack, Typography } from "@mui/material";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import {
+  IconButton,
+  Skeleton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,8 +38,15 @@ import {
   useGetoldmessagesQuery,
 } from "../redux/api/api";
 import { removeNewMessageAlert } from "../redux/reducers/chat";
-import { setisCallingToSomeOne, setisFileMenu } from "../redux/reducers/misc";
+import {
+  setisCallingToSomeOne,
+  setisFileMenu,
+  setisShowSmartReply,
+} from "../redux/reducers/misc";
 import { getSocket } from "../socket";
+import axios from "axios";
+import { server } from "../constants/config";
+import SmartReplyBox from "../components/specific/smartreplybox";
 
 function Chat({ chatId }) {
   const containerref = useRef(null);
@@ -44,9 +58,11 @@ function Chat({ chatId }) {
   const [messages, setmessages] = useState([]);
   const [page, setpage] = useState(1);
   const [FileMenuanchor, setisFileMenuanchor] = useState(null);
+  const [smartReplies, setsmartReplies] = useState(null);
   const user = useSelector((state) => {
     return state.auth.user;
   });
+  const { isShowSmartReply } = useSelector((state) => state.misc);
   const [IamTyping, setIamTyping] = useState(false);
   const [UserTyping, setUserTyping] = useState(false);
   const typingTimeOut = useRef(null);
@@ -76,6 +92,62 @@ function Chat({ chatId }) {
     { isError: oldmessageschunk.isError, error: oldmessageschunk.error },
   ];
   const members = chatdetails?.data?.chat?.members;
+
+  const GetSmartReply = async () => {
+    const sensitiveIdentifiers = [
+      // Passwords, PINs, etc. with typo tolerance
+      /\b(p(?:a|@)ss(?:w(?:o|0)rd|wrd|code)|pin(?:\s*number)?|cvv|otp|auth(?:entication)?\s*code|security\s*code|token|access\s*key|secret\s*key)\s*[:=]?\s*[\w\d!@#$%^&*()]{3,20}\b/i,
+
+      // ID numbers like DL, PAN, Aadhaar, etc.
+      /\b(d(?:riving|rivin|rvin|rving)?\s*licen[cs]e|passp(?:ort|rt)|p(?:e|a|@)n|aad[h]*ar|ssn|id(?:\s*number)?|account\s*number|iban|ifsc|upi)\s*(?:no|number)?\s*[:=]?\s*[\w\d\-\/]{4,}\b/i,
+
+      // Credit card numbers
+      /\b(?:c(?:r|k)edit\s*card|cc)\s*(?:no|number)?\s*[:=]?\s*\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/i,
+
+      // API keys, tokens
+      /\b(api\s*key|session\s*id|auth\s*token|secret\s*key|access\s*key)\s*[:=]?\s*[\w\-]{8,}\b/i,
+
+      // SSN format
+      /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/,
+
+      // License, Aadhaar, PAN etc.
+      /\b(?:ssn|passport|license|aadhaar|pan)\s*(?:no|number)?\s*[:=]?\s*[\w\-]{5,}\b/i,
+
+      // Generic keys/tokens
+      /\b(?:key|token)\s*[:=]?\s*[\w\-]{10,}\b/i,
+    ];
+
+    if (!user.allowAutoReply) {
+      toast.error("Enable Smart Reply to Get Smart Reply");
+      return;
+    }
+
+    const conversations = allmessages
+      .slice(-15)
+      .map((conversation) => ({
+        message: conversation.content,
+        sender: conversation.sender.name,
+      }));
+
+    const containsSensitiveInfo = conversations.some((msg) =>
+      sensitiveIdentifiers.some((pattern) => pattern.test(msg))
+    );
+
+    if (containsSensitiveInfo) {
+      toast.error(
+        "Some Confedential details may be present in last 15 message.\nSmart Reply Cannot be generated"
+      );
+      return;
+    }
+    dispatch(setisShowSmartReply(true));
+    const { data } = await axios.post(
+      `${server}/api/v1/chat/getSmartReply`,
+      { conversations, sendername: user.name },
+      { withCredentials: true }
+    );
+
+    setsmartReplies(data.smartReply);
+  };
 
   const sendmessage = (e) => {
     e.preventDefault();
@@ -189,8 +261,6 @@ function Chat({ chatId }) {
     [navigate]
   );
 
-  
-
   //Usecallback holds reference of a function
   const eventhandlers = {
     [ALERT]: alertlistener,
@@ -198,7 +268,6 @@ function Chat({ chatId }) {
     [START_TYPING]: starttypinghandlerlistner,
     [STOP_TYPING]: stoptypinghandlerlistner,
     [CALLING]: callreceivedatbackend,
-    
   };
 
   useSocketEvents(socket, eventhandlers);
@@ -230,7 +299,10 @@ function Chat({ chatId }) {
         marginTop={"1%"}
         gap={"5px"}
       >
-        <LiveLocationButton disabled={chatdetails?.data?.chat?.groupchat || false} chatId={chatId}/>
+        <LiveLocationButton
+          disabled={chatdetails?.data?.chat?.groupchat || false}
+          chatId={chatId}
+        />
         <Button
           onClick={startaudiocall}
           disabled={chatdetails?.data?.chat?.groupchat || false}
@@ -273,13 +345,17 @@ function Chat({ chatId }) {
         {UserTyping && <TypingLoader />}
         <div ref={bottomref} />
       </Stack>
+      {isShowSmartReply && (
+        <SmartReplyBox replies={smartReplies} setmessage={setmessage} />
+      )}
       <Stack
         direction={"row"}
         height={"10%"}
         maxHeight={"4rem"}
-        gap={"0.7rem"}
-        alignItems={"right"}
-        marginRight={"0.5rem"}
+        gap={"0.3%"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        marginRight={"0.3%"}
       >
         <form
           style={{
@@ -288,10 +364,19 @@ function Chat({ chatId }) {
           }}
           onSubmit={sendmessage}
         >
-          <Stack direction={"row"} height={"100%"} padding={"1rem"}>
+          <Stack direction={"row"} height={"100%"} padding={"0.2%"}>
             <IconButton
               onClick={handlefileopen}
-              sx={{ position: "relative", left: "1.5rem", rotate: "30deg" }}
+              sx={{
+                position: "relative",
+                left: {
+                  xs: "1.5rem",
+                  sm: "2rem",
+                  md: "3rem",
+                  lg: "5rem",
+                },
+                rotate: "30deg",
+              }}
             >
               <AttachFileIcon />
             </IconButton>
@@ -299,7 +384,7 @@ function Chat({ chatId }) {
           <FileMenu anchorE1={FileMenuanchor} chatId={chatId} />
         </form>
 
-        <Stack width={"100%"}>
+        <Stack width={"70%"}>
           <PlaceholdersAndVanishInput
             onChange={messagehandler}
             value={message}
@@ -307,6 +392,32 @@ function Chat({ chatId }) {
             placeholders={friendMessages}
             setValue={setmessage}
           />
+        </Stack>
+        <Stack
+          height="100%"
+          width="15%"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Tooltip title="Get Smart Reply" arrow>
+            <IconButton
+              sx={{
+                background: "linear-gradient(135deg, #e0f7fa, #e1bee7)",
+                borderRadius: "50%",
+                width: "70%",
+                height: "100%",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                transition: "all 0.3s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.1) rotate(8deg)",
+                  boxShadow: "0 6px 25px rgba(0, 0, 0, 0.2)",
+                },
+              }}
+              onClick={GetSmartReply}
+            >
+              <AutoAwesomeIcon color="primary" sx={{ fontSize: 28 }} />
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Stack>
       {/* <InputBox
