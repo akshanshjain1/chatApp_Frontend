@@ -95,27 +95,35 @@ function Chat({ chatId }) {
 
   const GetSmartReply = async () => {
     const sensitiveIdentifiers = [
-      // Passwords, PINs, etc. with typo tolerance
-      /\b(p(?:a|@)ss(?:w(?:o|0)rd|wrd|code)|pin(?:\s*number)?|cvv|otp|auth(?:entication)?\s*code|security\s*code|token|access\s*key|secret\s*key)\s*[:=]?\s*[\w\d!@#$%^&*()]{3,20}\b/i,
-
-      // ID numbers like DL, PAN, Aadhaar, etc.
-      /\b(d(?:riving|rivin|rvin|rving)?\s*licen[cs]e|passp(?:ort|rt)|p(?:e|a|@)n|aad[h]*ar|ssn|id(?:\s*number)?|account\s*number|iban|ifsc|upi)\s*(?:no|number)?\s*[:=]?\s*[\w\d\-\/]{4,}\b/i,
-
-      // Credit card numbers
-      /\b(?:c(?:r|k)edit\s*card|cc)\s*(?:no|number)?\s*[:=]?\s*\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/i,
-
-      // API keys, tokens
-      /\b(api\s*key|session\s*id|auth\s*token|secret\s*key|access\s*key)\s*[:=]?\s*[\w\-]{8,}\b/i,
-
-      // SSN format
+      // Passwords, PINs, OTPs, CVVs, etc. with typo tolerance and cross-line flexibility
+      /\b(p(?:a|@)?ss(?:w(?:o|0)?rd|wrd|code)?|p[a@]ss|pin(?:\s*number)?|cvv|cvc|otp|auth(?:entication)?\s*code|security\s*code|token|access\s*key|secret\s*key)\s*[:=]?\s*[\n\r\s]*["']?[\w\d!@#$%^&*()\-+=]{3,40}["']?\b/i,
+    
+      // National IDs and banking numbers: DL, PAN, Aadhaar, SSN, IFSC, UPI, etc.
+      /\b(?:driv(?:ing|in|n)?\s*licen[cs]e|dl\s*no|passp(?:ort|rt)|p[a@]n|aad+haar|ssn|national\s*id|govt\s*id|voter\s*id|id\s*(?:no|number)?|account\s*number|iban|ifsc|upi)\s*[:=]?\s*[\n\r\s]*["']?[\w\d\-\/]{4,40}["']?\b/i,
+    
+      // Credit/debit card numbers — supports multiline and separators
+      /\b(?:credit|debit)?\s*card\s*(?:no|number)?\s*[:=]?\s*[\n\r\s]*["']?\d{4,}([-\s]?\d{4,}){0,3}["']?\b/i,
+    
+      // API keys, auth tokens, session IDs — supports multiline
+      /\b(?:api[\s_-]*key|session[\s_-]*id|auth[\s_-]*token|secret[\s_-]*key|access[\s_-]*key)\s*[:=]?\s*[\n\r\s]*["']?[\w\-]{8,100}["']?\b/i,
+    
+      // US Social Security Number (SSN)
       /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/,
-
-      // License, Aadhaar, PAN etc.
-      /\b(?:ssn|passport|license|aadhaar|pan)\s*(?:no|number)?\s*[:=]?\s*[\w\-]{5,}\b/i,
-
-      // Generic keys/tokens
-      /\b(?:key|token)\s*[:=]?\s*[\w\-]{10,}\b/i,
+    
+      // Aadhaar (India): 12-digit format
+      /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/,
+    
+      // PAN (India): 5 letters + 4 digits + 1 letter
+      /\b[A-Z]{5}[0-9]{4}[A-Z]\b/i,
+    
+      // UPI ID: name@bank format
+      /\b[\w.\-]{2,30}@[a-z]{2,20}\b/i,
+    
+      // Generic sensitive keys/tokens
+      /\b(?:key|token|credential|password|secret)\s*[:=]?\s*[\n\r\s]*["']?[\w\-]{10,100}["']?\b/i,
     ];
+    
+    
 
     if (!user.allowAutoReply) {
       toast.error("Enable Smart Reply to Get Smart Reply");
@@ -128,15 +136,14 @@ function Chat({ chatId }) {
         message: conversation.content,
         sender: conversation.sender.name,
       }));
-
-    const containsSensitiveInfo = conversations.some((msg) =>
-      sensitiveIdentifiers.some((pattern) => pattern.test(msg))
+      
+    const containsSensitiveInfo = conversations.some(({message}) =>
+      sensitiveIdentifiers.some((pattern) => pattern.test(message))
     );
-
+    
     if (containsSensitiveInfo) {
       toast.error(
-        "Some Confedential details may be present in last 15 message.\nSmart Reply Cannot be generated"
-      );
+        "Some Confedential details may be present in last 15 message.\nSmart Reply Cannot be generated");
       return;
     }
     dispatch(setisShowSmartReply(true));
@@ -404,7 +411,12 @@ function Chat({ chatId }) {
               sx={{
                 background: "linear-gradient(135deg, #e0f7fa, #e1bee7)",
                 borderRadius: "50%",
-                width: "70%",
+                width: {
+                  xs:"90%",
+                  sm:"80%",
+                  md:"80%",
+                  lg:"80%"
+                },
                 height: "100%",
                 boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
                 transition: "all 0.3s ease-in-out",

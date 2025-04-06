@@ -69,7 +69,7 @@ function SmartReplyBox({ replies, setmessage }) {
             fontSize: { xs: "0.95rem", sm: "1rem" },
           }}
         >
-           Smart Suggestions for: “{baseText}”
+           Smart Suggestions for: “{tabIndex===0?(replies?.replyTo || ""):(replies?.continueFrom || "")}”
         </Typography>
 
         <IconButton onClick={handleClose}>
