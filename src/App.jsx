@@ -37,7 +37,13 @@ function App() {
 
   const dispatch=useDispatch()
   const {user,isloading}=useSelector((state)=>state.auth)
- 
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then(reg => console.log('Service Worker Registered', reg))
+        .catch(err => console.error('SW registration failed:', err));
+    });
+  }
   //  const router =createBrowserRouter([
   //   {
   //     path:'/',

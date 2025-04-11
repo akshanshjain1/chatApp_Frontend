@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 
@@ -15,4 +16,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const messaging = getMessaging(app);
 export const provider = new GoogleAuthProvider();
+
+export {getToken,onMessage}

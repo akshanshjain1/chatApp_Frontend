@@ -35,6 +35,8 @@ import DeleteChatMenu from "../dialog/deletechatmenu";
 import Profile from "../specific/profile";
 import CallReceive from "../dialog/callreceivedialog";
 import LiveLocationDialog from "../dialog/livelocationdialog";
+import { useFCM } from "../../hooks/useFCM";
+import NotificationPermissionDialog from "../specific/notificationPermissionDialog";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
@@ -49,6 +51,7 @@ const AppLayout = () => (WrappedComponent) => {
     const { newMessagesAlert } = useSelector((state) => state.chat);
     const { user } = useSelector((state) => state.auth);
     const [onlineusers, setonlineusers] = useState([]);
+    const [showNotifPrompt,setshowNotifPrompt]=useState(false)
     const [IncomingCallUserData, setIncomingCallUserData] = useState(null);
 
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
@@ -56,6 +59,17 @@ const AppLayout = () => (WrappedComponent) => {
     const navigate = useNavigate();
     const [hasUserInteracted, setHasUserInteracted] = useState(true);
     const [LiveLocationInfo,setLiveLocationInfo]=useState(null)
+
+
+    const enableNotifications = async () => {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        window.location.reload();
+      } else {
+        alert("Please enable notifications from your browser settings.");
+      }
+    };
+
     const newMessagesalerthandler = useCallback(
       async (data) => {
         if (data?.chatId === chatId) return;
@@ -115,7 +129,7 @@ const AppLayout = () => (WrappedComponent) => {
       [SOMEONE_CALLING]: callreceivehandler,
       [SOME_ONE_SENDING_LIVE_LOCATION]:handlelivelocation
     };
-
+    useFCM(user?._id,setshowNotifPrompt)
     useSocketEvents(socket, eventhandlers);
 
     useErrors([{ isError, error }]);
@@ -213,7 +227,15 @@ const AppLayout = () => (WrappedComponent) => {
             )
 
             }
+
+            
+              {showNotifPrompt && (
+                <NotificationPermissionDialog onEnable={enableNotifications} onDismiss={()=>setshowNotifPrompt(false)}/>
+              )}
+            
+
             <WrappedComponent {...props} chatId={chatId} />
+
           </Grid>
 
           <Grid

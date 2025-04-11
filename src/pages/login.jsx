@@ -4,7 +4,7 @@ import { signInWithPopup } from "firebase/auth";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { FaGoogle, FaLock, FaUser } from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import "reactflow/dist/style.css";
 import { server } from "../constants/config";
@@ -14,6 +14,7 @@ function Login() {
   const username = useInputValidation("");
   const password = useInputValidation("");
   const [isloading, setisloading] = useState(false);
+  const {user}=useSelector(state=>state.auth)
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleLogin = async (e) => {
@@ -35,6 +36,9 @@ function Login() {
       );
       dispatch(userExists(data.data));
       toast.success(data.message);
+      await axios.post(`${server}/api/v1/user/save-fcm-token`,{token:null,userId:data.data._id},{withCredentials:true})
+    
+      
       navigate("/chatroom");
     } catch (error) {
       toast.error(
@@ -67,6 +71,8 @@ function Login() {
 
       dispatch(userExists(data.data));
       toast.success(data.message);
+      await axios.post(`${server}/api/v1/user/save-fcm-token`,{token:null,userId:data.data._id},{withCredentials:true})
+        
       navigate("/chatroom");
     } catch (error) {
       console.error("Login failed:", error);
