@@ -36,8 +36,7 @@ function Login() {
       );
       dispatch(userExists(data.data));
       toast.success(data.message);
-      await axios.post(`${server}/api/v1/user/save-fcm-token`,{token:null,userId:data.data._id},{withCredentials:true})
-    
+      
       
       navigate("/chatroom");
     } catch (error) {
@@ -71,8 +70,7 @@ function Login() {
 
       dispatch(userExists(data.data));
       toast.success(data.message);
-      await axios.post(`${server}/api/v1/user/save-fcm-token`,{token:null,userId:data.data._id},{withCredentials:true})
-        
+          
       navigate("/chatroom");
     } catch (error) {
       console.error("Login failed:", error);
