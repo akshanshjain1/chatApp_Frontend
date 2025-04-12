@@ -37,6 +37,7 @@ import CallReceive from "../dialog/callreceivedialog";
 import LiveLocationDialog from "../dialog/livelocationdialog";
 import { useFCM } from "../../hooks/useFCM";
 import NotificationPermissionDialog from "../specific/notificationPermissionDialog";
+import InstallPrompt from "../specific/installPWApromot";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
@@ -51,7 +52,7 @@ const AppLayout = () => (WrappedComponent) => {
     const { newMessagesAlert } = useSelector((state) => state.chat);
     const { user } = useSelector((state) => state.auth);
     const [onlineusers, setonlineusers] = useState([]);
-    const [showNotifPrompt,setshowNotifPrompt]=useState(false)
+    const [showNotifPrompt,setshowNotifPrompt]=useState(Notification.permission==="default"?true:false)
     const [IncomingCallUserData, setIncomingCallUserData] = useState(null);
 
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
@@ -232,8 +233,9 @@ const AppLayout = () => (WrappedComponent) => {
               {showNotifPrompt && (
                 <NotificationPermissionDialog onEnable={enableNotifications} onDismiss={()=>setshowNotifPrompt(false)}/>
               )}
+              
             
-
+              <InstallPrompt/>
             <WrappedComponent {...props} chatId={chatId} />
 
           </Grid>

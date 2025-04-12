@@ -1,0 +1,48 @@
+{     
+    "id":"/",
+    "name": "Chatkaro",
+    "short_name": "Chatkaro",
+    "description": "Connecting friends",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4CAF50",
+    "orientation": "portrait",
+    "lang": "en",
+    "scope": "/",
+    "icons": [
+      {
+        "src": "./Aha-Soft-3d-Social-Forum-Orange.128.png",
+        "sizes": "128x128",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "./final-image.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "./Aha-Soft-3d-Social-Forum-Orange.512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
+    ],
+    "screenshots":[
+      {
+        "src": "./Screenshot 2025-04-12 213927.png",
+        "sizes": "1919x889",
+        "type": "image/png",
+        "form_factor": "wide"
+      },
+      {
+        "src": "./Screenshot 2025-04-12 213945.png",
+        "sizes": "634x747",
+        "type": "image/png",
+        "form_factor": "narrow"
+      }
+    ]
+  }
+  

@@ -4,11 +4,10 @@ import { messaging } from "../services/firebaseConfig";
 import {server} from "../constants/config"
 import axios from "axios";
 const VAPID_KEY = import.meta.env.VITE_PUBLIC_VAPID_KEY;
-navigator.serviceWorker.register('/firebase-messaging-sw.js')
-.then(registration => {
-  console.log(' Service worker registered');
-});
+await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+
 export const useFCM = (userId, setShowNotifPrompt) => {
+ 
   useEffect(() => {
     if (!userId) return;
    
